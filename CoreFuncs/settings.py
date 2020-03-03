@@ -2,7 +2,8 @@ import uuid
 # from CoreFuncs.func import *
 import telebot
 from CoreFuncs.resources import *
-
+from datetime import timedelta
+from collections import defaultdict
 MsgJs = Myjson("Files/Msgs")
 SetJs = Myjson("Files/settings")
 API_TOKEN = SetJs.get('Token')
@@ -15,8 +16,10 @@ ActiveUsers = []
 AppList = {} # contain class appoint
 UserLists = {} # for registration, contain class client
 TempLongList = {} #for how long
-TempUsers = {}
+TempUsers = defaultdict(lambda: [])
+# TempUsers = {}
 StockChange = {}
 BroadMessage = {}
 appoin_limit = 3
 WeekDays = ["ב'","ג'","ד'","ה'","ו'","ש'","א'",]
+cancel_limit = timedelta(hours=1)

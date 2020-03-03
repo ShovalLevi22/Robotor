@@ -11,6 +11,7 @@ from googleapiclient.discovery import build
 
 class Log(Exception):
     def __init__(self):
+        logging.basicConfig(filename='bot.log',filemode='w',format='%(asctime)s - %(message)s',level=logging.INFO)
         self.func_name = traceback.extract_stack(None, 2)[0][2]
     def Pass(self,chat_id):
         logging.error(str(chat_id) + f":Pass exception occurred in " + self.func_name + f" -> {traceback.format_exc()}")

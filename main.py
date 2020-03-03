@@ -1,16 +1,17 @@
 from CoreFuncs.settings import *
 from CoreFuncs.func import *
 from CoreFuncs.classes import Appoint
-from Processes.makeAppoint import All_MakeAppo
-class All_MainMenu:
+from Processes.makeAppoint import MakeAppo, DelAppo
+from CoreFuncs.Admin import Admin
+class MainMenu:
     '''
-        ['All', 'MainMenu', 'num button']
+        ['MainMenu', 'num button']
     '''
     def __init__(self, call, init=False):
 
         self.call = call
         self.chat_id = str(call.from_user.id)
-        self.value_from_callback = AST(call)[3] if not init else 0
+        self.value_from_callback = AST(call)[2] if not init else 0
         ActiveUsers.append(self.chat_id)
         method_name = 'Button_' + str(self.value_from_callback)
         log.Choice(self.chat_id,"main menu "+method_name)
@@ -22,7 +23,7 @@ class All_MainMenu:
     #
     @staticmethod
     def hacky_init(call):
-        All_MainMenu(call)
+        MainMenu(call)
 
     def Button_0(self):
         cleanInfo(self.chat_id)
@@ -41,16 +42,28 @@ class All_MainMenu:
             else:
                 AppList[self.chat_id] = Appoint()
                 AppList[self.chat_id].getUser(self.chat_id)
-                return create_menu(self.call, ServsTexst, All_MakeAppo.serviceKeyboard())
+                return create_menu(self.call, ServsTexst, MakeAppo.serviceKeyboard())
 
     # Show active Appointments
     def Button_2(self):
-        create_menu(self.call,textShowApp(self.chat_id,self.call),onlyToMainKeyboard())
+        if self.chat_id in SetJs.get("Admins"):
+            deleteByList(self.chat_id)
+            msg = bot.send_message(chat_id=self.chat_id,
+                                   text="על מנת לצפות בתורים עתידיים של לקוח נא שלח את איש הקשר,\n לחזרה לתפריט הראשי לחץ /start",
+                                   parse_mode='Markdown')
+            MsgJs.addToLstInJson(self.chat_id,msg.message_id)
+            bot.register_next_step_handler(msg,Admin.textShowAppContact)
+
+        else:
+            create_menu(self.call,textShowApp(self.chat_id,self.call),onlyToMainKeyboard())
 
     # Cancel active Appointments
     def Button_3(self):
-        create_menu(self.call,textShowApp(self.call.message.chat.id,self.call),
-                    cancelAPPKeyboard(self.call.message.chat.id))
+        if self.chat_id in SetJs.get("Admins"):
+            create_menu(self.call,Admin.textShowAppAdmin(self.chat_id),DelAppo.cancelAPPKeyboard(self.chat_id))
+        else:
+            create_menu(self.call,textShowApp(self.chat_id,self.call),
+                        DelAppo.cancelAPPKeyboard(self.chat_id))
 
 
 
@@ -64,8 +77,8 @@ class Keyborad_Switcher:
         self.call = call
         kb_name = AST(call)[1]
         self.chat_id = str(call.from_user.id)
-        method_name = AST(call)[2]
-        method_name = globals()[f'{kb_name}_{method_name}']
+        # method_name = AST(call)[2]
+        method_name = globals()[f'{kb_name}']
         method = getattr(method_name, 'hacky_init', lambda: 'Invalid')
         method(call)
 
@@ -79,20 +92,15 @@ def handle_command_start(message, text=''):
     try:
 
         if(checkRegistration(chat_id)):
-            st_txt = start_text(chat_id)
-            msg = bot.send_message(chat_id,text + '\n\n' + st_txt,
-                                   reply_markup=mainKeyboard(chat_id),
-                                   parse_mode='Markdown',
-                                   disable_web_page_preview=True)
-
+            mainMenu_msg(chat_id)
 
         else:  # '''UnRegister_txt'''
             msg = bot.send_message(chat_id,UnRegister_txt() + "\n\n* מה השם המלא שלך?*\n\n",
                                    parse_mode='Markdown')
             bot.register_next_step_handler(msg, process_name_step)
 
-        deleteByList(chat_id)
-        MsgJs.addToLstInJson(chat_id,msg.message_id)
+            deleteByList(chat_id)
+            MsgJs.addToLstInJson(chat_id,msg.message_id)
 
 
     except:

@@ -103,7 +103,7 @@ def FinalEx(chat_id):
     # ActiveUsers.remove(chat_id)
     log.Info(chat_id,'Information of user deleted from lists before new menu')
     markup =types.InlineKeyboardMarkup()
-    markup.add(btn("חזרה לתפריט הראשי 🏠",['All', 'MainMenu', '0']))
+    markup.add(btn("חזרה לתפריט הראשי 🏠",['MainMenu', '0']))
     text = 'נתקלת בבעיה, אנא לחץ על על הכפתור על מנת להתחיל את התהליך מחדש,\n '
     deleteByList(chat_id)
     MsgJs.addToLstInJson(chat_id,bot.send_message(chat_id=chat_id,
@@ -155,6 +155,13 @@ def check_if_exist(chat_id):
     except:
         log.Warn(chat_id)
         return True
+
+def phone_Refactor(phoneNumber):
+    temp = phoneNumber.strip('+')
+    if (temp[0:3] == '972'):
+        temp = '0' + temp[3:]
+    return temp
+
 #Text:
 def txtFromFile(jsonValue):
     try:
@@ -199,7 +206,7 @@ def instagram():
 #Keyboards:
 def btn(text=None, callback_data=None, link=None, Ver=True, Home=False, Dummy=False):
     if Home:
-        return btn('חזרה לתפריט הראשי 🏠', ['All', 'MainMenu','0'])
+        return btn('חזרה לתפריט הראשי', ['MainMenu', '0'])
     if Dummy:
         return btn(text, ['Dummy_Button'])
     if callback_data:
@@ -211,6 +218,14 @@ def btn(text=None, callback_data=None, link=None, Ver=True, Home=False, Dummy=Fa
         return types.InlineKeyboardButton(text=text, callback_data=callb)
     elif link:
         return types.InlineKeyboardButton(text=text, url='https://t.me/' + link)
+
+def mainMenu_msg(chat_id,text=' '):
+    deleteByList(chat_id)
+    msg = bot.send_message(chat_id,text + '\n\n' + start_text(chat_id),
+                           reply_markup=mainKeyboard(chat_id),
+                           parse_mode='Markdown',
+                           disable_web_page_preview=True)
+    MsgJs.addToLstInJson(chat_id,msg.message_id)
 
 def create_menu(call, text1, reply_m, string='default'):
     chat_id = str(call.from_user.id)
@@ -253,9 +268,9 @@ def mainKeyboard(chat_id):
         mainbut3 = "ביטול תור עתידי ✖️"
         mainbut4 = "לוח  הודעות ✉️"
         mainbut5 = "מדריך לשימוש בבוט ⚙"
-        markup.add(btn(mainbut1,["All","MainMenu",'1']))
-        markup.add(btn(mainbut2,["All","MainMenu",'2']))
-        markup.add(btn(mainbut3,["All","MainMenu",'3']))
+        markup.add(btn(mainbut1,["MainMenu",'1']))
+        markup.add(btn(mainbut2,["MainMenu",'2']))
+        markup.add(btn(mainbut3,["MainMenu",'3']))
         markup.add(btn(mainbut4,link="https://t.me/joinchat/AAAAAEwLLrdnXBfqXMAzfA"))
         markup.add(btn(mainbut5,link='http://t.me/MegaKush'))
 
@@ -263,7 +278,7 @@ def mainKeyboard(chat_id):
 
 def onlyToMainKeyboard():
     markup = types.InlineKeyboardMarkup()
-    markup.add(btn("חזרה לתפריט הראשי 🏠",['All', 'MainMenu', '0']))
+    markup.add(btn("חזרה לתפריט הראשי 🏠",['MainMenu', '0']))
     return markup
 
 def textShowApp(chat_id, call):
@@ -285,18 +300,26 @@ def textShowApp(chat_id, call):
         log.Warn(chat_id)
         FinalEx(chat_id)
 
-def cancelAPPKeyboard(chat_id):
-    try:
-        appoints = DB.get("Appointments",where=f"user_id={chat_id}",order="date, time")
-        markup = types.InlineKeyboardMarkup()
-        for i,ap in appoints.iterrows():
-            text = ap["service_name"] + ' ב- ' + goodloking_date(ap["date"]) + ' ,' + ap["time"][:5]
-            markup.add(
-                types.InlineKeyboardButton(text=text,callback_data="['" + Version + "','delete','" + str(
-                    ap["appoint_id"]) + "']"))
-    except:
-        pass
+# def cancelAPPKeyboard(chat_id):
+#     try:
+#         appoints = DB.get("Appointments",where=f"user_id={chat_id}",order="date, time")
+#         markup = types.InlineKeyboardMarkup()
+#         for i,ap in appoints.iterrows():
+#             text = ap["service_name"] + ' ב- ' + goodloking_date(ap["date"]) + ' ,' + ap["time"][:5]
+#             markup.add(btn(text,['All','DelAppo','to_confirm_del_keyboard',str(ap["appoint_id"])]))
+#
+#             markup.add(
+#                 types.InlineKeyboardButton(text=text,callback_data="['" + Version + "','delete','" + str(
+#                     ap["appoint_id"]) + "']"))
+#     except:
+#         pass
+#
+#     markup.add(
+#         types.InlineKeyboardButton(text="חזרה לתפריט הראשי 🏠",callback_data="['" + Version + "','Menu','0']"))
+#     return markup
 
-    markup.add(
-        types.InlineKeyboardButton(text="חזרה לתפריט הראשי 🏠",callback_data="['" + Version + "','Menu','0']"))
+def confirmDelKeyboard(appo_indexer=None):
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton(text='כן', callback_data="['" + Version + "','confirm','yesdel','" + appo_indexer + "']"))
+    markup.add(types.InlineKeyboardButton(text='לא',callback_data="['" + Version + "','Menu','0']"))
     return markup
