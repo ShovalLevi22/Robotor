@@ -2,6 +2,7 @@ from CoreFuncs.func import *
 from datetime import datetime,timedelta
 from CoreFuncs.classes import Appoint
 
+
 class MakeAppo:
     """ ['MakeAppo', 'function', value] """
     def __init__(self,call):

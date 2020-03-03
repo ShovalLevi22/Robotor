@@ -2,6 +2,7 @@ from CoreFuncs.settings import *
 from datetime import datetime, timedelta
 from CoreFuncs.func import goodloking_date
 
+
 class Client:
     def __init__(self, chat_id=None):
         self.chat_id = chat_id  # chat ID ?
@@ -186,3 +187,5 @@ class Appoint(Client,Service):
             traceback.print_exc()
             return "הביטול לא צלח , יש לפנות לבעל העסק"
             #return "הביטול לא צלח, יתכן כי התור כבר בוטל. "
+
+
