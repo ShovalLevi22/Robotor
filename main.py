@@ -1,8 +1,9 @@
-from CoreFuncs.settings import *
 from CoreFuncs.func import *
 from CoreFuncs.classes import Appoint
 from Processes.makeAppoint import MakeAppo, DelAppo
 from CoreFuncs.Admin import Admin
+from CoreFuncs.registration import Registration
+
 class MainMenu:
     '''
         ['MainMenu', 'num button']
@@ -95,12 +96,13 @@ def handle_command_start(message, text=''):
             mainMenu_msg(chat_id)
 
         else:  # '''UnRegister_txt'''
-            msg = bot.send_message(chat_id,UnRegister_txt() + "\n\n* מה השם המלא שלך?*\n\n",
-                                   parse_mode='Markdown')
-            bot.register_next_step_handler(msg, process_name_step)
-
-            deleteByList(chat_id)
-            MsgJs.addToLstInJson(chat_id,msg.message_id)
+            # msg = bot.send_message(chat_id,txtFromFile('UnregisteredTXT') + "\n\n* מה השם המלא שלך?*\n\n",
+            #                        parse_mode='Markdown')
+            Registration.next_step_reg(chat_id)
+            # bot.register_next_step_handler(msg, Registration, 'process_name_step')
+            #
+            # deleteByList(chat_id)
+            # MsgJs.addToLstInJson(chat_id,msg.message_id)
 
 
     except:

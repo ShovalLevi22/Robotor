@@ -1,9 +1,8 @@
 import ast
-from CoreFuncs.settings import *
+from settings import *
 from datetime import datetime
 from Files.text.Headers import *
 from telebot import types
-
 #Helpers:
 def VersionMisMatch(call):
     try:
@@ -103,7 +102,10 @@ def FinalEx(chat_id):
     # ActiveUsers.remove(chat_id)
     log.Info(chat_id,'Information of user deleted from lists before new menu')
     markup =types.InlineKeyboardMarkup()
-    markup.add(btn("חזרה לתפריט הראשי 🏠",['MainMenu', '0']))
+    if checkRegistration(chat_id):
+        markup.add(btn(Home=True))
+    else:
+        markup.add(btn("חזרה לתפריט הראשי",['Registration','process_name_step']))
     text = 'נתקלת בבעיה, אנא לחץ על על הכפתור על מנת להתחיל את התהליך מחדש,\n '
     deleteByList(chat_id)
     MsgJs.addToLstInJson(chat_id,bot.send_message(chat_id=chat_id,
@@ -161,6 +163,8 @@ def phone_Refactor(phoneNumber):
     if (temp[0:3] == '972'):
         temp = '0' + temp[3:]
     return temp
+
+
 
 #Text:
 def txtFromFile(jsonValue):
@@ -248,6 +252,14 @@ def create_menu(call, text1, reply_m, string='default'):
     except:
         log.Warn(chat_id)
         FinalEx(chat_id)
+
+def send_msg(chat_id, text, reply_m = None, delete = True):
+    msg = bot.send_message(chat_id,text,reply_markup=reply_m, parse_mode='Markdown',
+                           disable_web_page_preview=True)
+    if delete:
+        deleteByList(chat_id)
+    MsgJs.addToLstInJson(chat_id,msg.message_id)
+    return msg
 
 def mainKeyboard(chat_id):
     markup = types.InlineKeyboardMarkup()

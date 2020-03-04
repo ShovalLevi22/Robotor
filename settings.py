@@ -14,7 +14,7 @@ GC = GCFuncs()
 
 ActiveUsers = []
 AppList = {} # contain class appoint
-UserLists = {} # for registration, contain class client
+UserLists = defaultdict(lambda: []) # for registration, contain class client Client()
 TempLongList = {} #for how long
 TempUsers = defaultdict(lambda: [])
 # TempUsers = {}

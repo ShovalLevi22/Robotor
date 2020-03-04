@@ -1,4 +1,5 @@
-from CoreFuncs.settings import *
+from settings import DB, log, GC, SetJs, bot
+import traceback
 from datetime import datetime, timedelta
 from CoreFuncs.func import goodloking_date
 

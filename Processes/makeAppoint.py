@@ -3,6 +3,7 @@ from datetime import datetime,timedelta
 from CoreFuncs.classes import Appoint
 
 
+
 class MakeAppo:
     """ ['MakeAppo', 'function', value] """
     def __init__(self,call):
@@ -342,8 +343,6 @@ class MakeAppo:
     def back_to_time(self):
         date = AppList[self.chat_id].date
         create_menu(self.call, TimingText, self.timeKeyboard(self.chat_id, str(date)))
-
-
 
 
 class DelAppo:
