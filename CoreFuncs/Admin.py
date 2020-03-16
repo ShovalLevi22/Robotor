@@ -101,7 +101,7 @@ class Admin:
         if message.text == '/start':
             deleteByList(chat_id)
             MsgJs.addToLstInJson(chat_id,
-                                 bot.send_message(chat_id,admin_start_txt,reply_markup=mainKeyboard(chat_id)).message_id)
+                                 bot.send_message(chat_id,start_text(chat_id),reply_markup=mainKeyboard(chat_id)).message_id)
         else:
             markup = types.InlineKeyboardMarkup()
             markup.add(btn('כן',['Admin', 'send_msg', None]))
@@ -117,7 +117,7 @@ class Admin:
         log.Choice(self.chat_id,"confirmed send broad message")
         self.sendBroadMsg()
         deleteByList(self.chat_id)
-        MsgJs.addToLstInJson(self.chat_id,bot.send_message(self.chat_id,"ההודעה נשלחה בהצלחה!\n" + admin_start_txt,
+        MsgJs.addToLstInJson(self.chat_id,bot.send_message(self.chat_id,"ההודעה נשלחה בהצלחה!\n" + start_text(self.chat_id),
                                                       reply_markup=mainKeyboard(self.chat_id),
                                                       parse_mode='Markdown').message_id)
 
@@ -221,7 +221,7 @@ class Admin_Stock:
 
         except:
             if (message.text == '/start'):
-                txt = admin_start_txt
+                txt = start_text(self.chat_id)
                 deleteByList(self.chat_id)
                 MsgJs.addToLstInJson(self.chat_id,bot.send_message(chat_id=self.chat_id,
                                                               text=txt,

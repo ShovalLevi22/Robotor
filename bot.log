@@ -1,0 +1,35 @@
+2020-03-16 14:30:56,916 - file_cache is unavailable when using oauth2client >= 4.0.0 or google-auth
+Traceback (most recent call last):
+  File "C:\Users\Liad\PycharmProjects\Robotor\venv\lib\site-packages\googleapiclient\discovery_cache\__init__.py", line 36, in autodetect
+    from google.appengine.api import memcache
+ModuleNotFoundError: No module named 'google.appengine'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Liad\PycharmProjects\Robotor\venv\lib\site-packages\googleapiclient\discovery_cache\file_cache.py", line 33, in <module>
+    from oauth2client.contrib.locked_file import LockedFile
+ModuleNotFoundError: No module named 'oauth2client'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Liad\PycharmProjects\Robotor\venv\lib\site-packages\googleapiclient\discovery_cache\file_cache.py", line 37, in <module>
+    from oauth2client.locked_file import LockedFile
+ModuleNotFoundError: No module named 'oauth2client'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Liad\PycharmProjects\Robotor\venv\lib\site-packages\googleapiclient\discovery_cache\__init__.py", line 41, in autodetect
+    from . import file_cache
+  File "C:\Users\Liad\PycharmProjects\Robotor\venv\lib\site-packages\googleapiclient\discovery_cache\file_cache.py", line 41, in <module>
+    'file_cache is unavailable when using oauth2client >= 4.0.0 or google-auth')
+ImportError: file_cache is unavailable when using oauth2client >= 4.0.0 or google-auth
+2020-03-16 14:30:56,917 - URL being requested: GET https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest
+2020-03-16 14:30:58,299 - Starting new HTTPS connection (1): api.telegram.org
+2020-03-16 14:30:59,102 - 724274076: in <module>
+2020-03-16 14:30:59,116 - Starting new HTTPS connection (1): api.telegram.org
+2020-03-16 14:31:03,290 - 724274076: Action: main menu Button_5
+2020-03-16 14:31:03,297 - Starting new HTTPS connection (1): api.telegram.org
+2020-03-16 14:31:09,634 - 724274076: Action: confirmed send broad message
