@@ -6,10 +6,11 @@ from telebot import types
 #Helpers:
 def VersionMisMatch(call):
     try:
-        # deleteByList(str(call.message.chat.id))
-        MsgJs.addToLstInJson(str(call.message.chat.id) ,bot.edit_message_text(chat_id=call.message.chat.id,
-                              text="*היי* 🤩\n הבוט עבר עדכון קטן \n אנא לחץ על על הכפתור על מנת לפתוח את התפריט המעודכן ביותר",
-                              message_id=call.message.message_id,reply_markup=onlyToMainKeyboard(), parse_mode='Markdown').message_id)
+        deleteByList(str(call.message.chat.id))
+        MsgJs.addToLstInJson(str(call.message.chat.id), bot.send_message(str(call.message.chat.id),"*היי* 🤩\n הבוט עבר עדכון קטן \n אנא לחץ על על הכפתור על מנת לפתוח את התפריט המעודכן ביותר",reply_markup=onlyToMainKeyboard(), parse_mode='Markdown').message_id)
+        # MsgJs.addToLstInJson(str(call.message.chat.id) ,bot.edit_message_text(chat_id=call.message.chat.id,
+        #                       text="*היי* 🤩\n הבוט עבר עדכון קטן \n אנא לחץ על על הכפתור על מנת לפתוח את התפריט המעודכן ביותר",
+        #                       message_id=call.message.message_id,reply_markup=onlyToMainKeyboard(), parse_mode='Markdown').message_id)
 
     except:
         log.Pass(call.message.chat.id)
@@ -265,12 +266,19 @@ def mainKeyboard(chat_id):
     markup = types.InlineKeyboardMarkup()
     # Admin Panel
     if str(chat_id) in SetJs.get('Admins'):
-        markup.add(types.InlineKeyboardButton(text=" קביעת תור ללקוח 📆", callback_data="['" + Version + "','Admin','1']")), \
-        markup.add(types.InlineKeyboardButton(text=" צפייה בתורים עתידיים 📖", callback_data="['" + Version + "','Admin','6']")), \
-        markup.add(types.InlineKeyboardButton(text=" ביטול תור עתידי ✖️", callback_data="['" + Version + "','Admin','2']")), \
-        markup.add(types.InlineKeyboardButton(text=" פרטי השירותים שלי ✍", callback_data="['" + Version + "','Admin','3']")), \
-        markup.add(types.InlineKeyboardButton(text=" שליחת הודעת תפוצה 📨", callback_data="['" + Version + "','Admin','7']")), \
-        markup.add(types.InlineKeyboardButton(text=" ערוצים ↖️", callback_data="['" + Version + "','Admin','8']"))#, \
+        # markup.add(types.InlineKeyboardButton(text=" קביעת תור ללקוח 📆", callback_data="['" + Version + "','Admin','1']")), \
+        markup.add(btn(" קביעת תור ללקוח 📆",["MainMenu",'1']))
+        markup.add(btn(" צפייה בתורים עתידיים 📖",["MainMenu",'2']))
+        markup.add(btn(" ביטול תור עתידי ✖️",["MainMenu",'3']))
+        markup.add(btn(" פרטי השירותים שלי ✍",["MainMenu",'4']))
+        markup.add(btn(" שליחת הודעת תפוצה 📨",["MainMenu",'5']))
+        markup.add(btn(" ערוצים ↖️",["MainMenu",'6']))
+
+        # markup.add(types.InlineKeyboardButton(text=" צפייה בתורים עתידיים 📖", callback_data="['" + Version + "','Admin','6']")), \
+        # markup.add(types.InlineKeyboardButton(text=" ביטול תור עתידי ✖️", callback_data="['" + Version + "','Admin','2']")), \
+        # markup.add(types.InlineKeyboardButton(text=" פרטי השירותים שלי ✍", callback_data="['" + Version + "','Admin','3']")), \
+        # markup.add(types.InlineKeyboardButton(text=" שליחת הודעת תפוצה 📨", callback_data="['" + Version + "','Admin','7']")), \
+        # markup.add(types.InlineKeyboardButton(text=" ערוצים ↖️", callback_data="['" + Version + "','Admin','8']"))#, \
 
     else:
         # main buttons

@@ -292,7 +292,7 @@ class MakeAppo:
         AppList[self.chat_id].time = self.value
         text = " האם את/ה בטוח שאתה רוצה לקבוע תור ל" + self.ap.serv_name + "\nבתאריך " + goodloking_date(
             self.ap.date) + "\nלשעה " + self.ap.time[:5]
-        create_menu(self.call,text,self.toconfirmKeyboard(False,'N'))
+        create_menu(self.call,text,self.toconfirmKeyboard())
 
     def naxt_times(self):
         TempUsers[self.chat_id][1] += 1
@@ -418,7 +418,11 @@ class DelAppo:
 
         ap = Appoint()
         ap.setAppo(self.value)
-        ap.getUser(self.chat_id)
+        if str(self.chat_id) in SetJs.get('Admins'):
+            ap.chat_id = self.chat_id
+        #
+        # else:
+        #     ap.getUser(self.chat_id)
         txt = ap.delAppo() + "\n" + start_text(self.chat_id)
         create_menu(self.call,str(txt),mainKeyboard(self.chat_id))
 

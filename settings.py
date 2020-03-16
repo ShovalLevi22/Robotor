@@ -23,3 +23,8 @@ BroadMessage = {}
 appoin_limit = 3
 WeekDays = ["ב'","ג'","ד'","ה'","ו'","ש'","א'",]
 cancel_limit = timedelta(hours=1)
+
+
+def changeVersion():
+    global Version
+    Version = str(uuid.uuid4()).split('-')[1]

@@ -69,21 +69,24 @@ class Appoint(Client,Service):
 
     def setAppo(self,appo_id):
         #BUG: check if appo exists
-        res = DB.get('Appointments',where=f"appoint_id='{appo_id}'")
-        if res.empty:
-            res = DB.get('Admin_appoints',where=f"appoint_id='{appo_id}'")
-        if res.empty:
-            return False
+        res = DB.get('Admin_appoints',where=f"appoint_id='{appo_id}'")
+        if not res.empty:
+            self.cli_name = res['cli_name'][0]
+            self.phone = res['cli_phone'][0]
+
         else:
-            try:
+            res = DB.get('Appointments',where=f"appoint_id='{appo_id}'")
+            if res.empty:
+                return False
+            else:
                 self.chat_id = res['user_id'][0] #only when not Admin
-            except:
-                pass
-            self.appo_id = res['appoint_id'][0]
-            self.serv_name = res['service_name'][0]
-            self.time = res['time'][0][:5]
-            self.date = res['date'][0]
-            return True
+                self.getUser(self.chat_id)
+
+        self.appo_id = res['appoint_id'][0]
+        self.serv_name = res['service_name'][0]
+        self.time = res['time'][0][:5]
+        self.date = res['date'][0]
+        return True
 
     def book_apoint(self,chat_id):
         try:
@@ -165,9 +168,7 @@ class Appoint(Client,Service):
             GC.delAppo(self.appo_id)
             date = goodloking_date(self.date)
 
-
-
-            try:
+            try: #BUG: what if not in admin ?
                 DB.delete("Admin_appoints",f"appoint_id='{self.appo_id}'")
                 DB.delete("Appointments",f"appoint_id='{self.appo_id}'")
 
@@ -176,6 +177,9 @@ class Appoint(Client,Service):
 
             if str(self.chat_id) in SetJs.get('Admins'):
                 txt = "התור התבטל בהצלחה,\n"
+                update_txt = '❌ בוטל תור ע"י ' + SetJs.get("Admins_name")[self.chat_id] +" ל"+self.cli_name+ ":\n" + self.serv_name + ',' + goodloking_date(
+                    self.date) + ' , ' + self.time[:5]
+                bot.send_message(SetJs.get("Channels")["update"],update_txt)
 
             else:
                 txt = "התור שלך ל" + self.serv_name + " "" בתאריך " + date + " בשעה " + self.time + " בוטל.\n נשמח לראותך שוב בפעם אחרת 😊\n\n"

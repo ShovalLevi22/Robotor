@@ -1,8 +1,9 @@
 from CoreFuncs.func import *
 from CoreFuncs.classes import Appoint
 from Processes.makeAppoint import MakeAppo, DelAppo
-from CoreFuncs.Admin import Admin
-from CoreFuncs.registration import Registration
+from CoreFuncs.Admin import Admin, Admin_Stock
+from Processes.registration import Registration
+from telebot.apihelper import ApiException
 
 class MainMenu:
     '''
@@ -66,8 +67,38 @@ class MainMenu:
             create_menu(self.call,textShowApp(self.chat_id,self.call),
                         DelAppo.cancelAPPKeyboard(self.chat_id))
 
+    # change stock
+    def Button_4(self):
+        try:
+            text = 'קידוד השירותים בפורמט -\n'
+            text += "`שם השירות - זמן התור - מחיר `" + '\n\n'
+            text += 'קידוד שירותים בפורמט באנגלית- (אותו דבר רק מראה)\n'
+            text += "`service name - duration - Price`" + '\n\n'
+            MsgJs.addToLstInJson(self.chat_id,bot.edit_message_text(chat_id=self.chat_id,
+                                                               text=text,
+                                                               message_id=self.call.message.message_id,
+                                                               parse_mode='Markdown',
+                                                               disable_web_page_preview=True).message_id)
+            MsgJs.addToLstInJson(self.chat_id,bot.send_message(chat_id=self.chat_id,
+                                                          text=Admin_Stock.text(),
+                                                          reply_markup=Admin_Stock.Keyboard(),
+                                                          parse_mode='Markdown',
+                                                          disable_web_page_preview=True).message_id)
+        except ApiException:
+            pass
 
+    # send broad message
+    def Button_5(self):
+        deleteByList(str(self.chat_id))
+        msg = bot.send_message(chat_id=self.chat_id,
+                               text="נא שלח/י את הודעת התפוצה,\n לחזרה לתפריט הראשי לחץ /start",
+                               parse_mode='Markdown')
+        MsgJs.addToLstInJson(self.chat_id,msg.message_id)
+        bot.register_next_step_handler(msg,Admin.confirmSendBroadMsg)
 
+    # open channels
+    def Button_6(self):
+        create_menu(self.call,optionsHead,Admin.chanelsKeyboard())
 
 class Keyborad_Switcher:
     '''
@@ -131,5 +162,9 @@ def deleteMessage(message):
     if (message.chat.type == 'private'):
         bot.delete_message(message.chat.id, message.message_id)
 
+import threading
+from Processes.syncAndRemind import SyncAndRemind
+thread = threading.Thread(target=SyncAndRemind.activate)
+thread.start()
 
 bot.polling()
