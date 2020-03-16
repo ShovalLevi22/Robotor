@@ -96,41 +96,37 @@ class Admin:
     @staticmethod
 
     def confirmSendBroadMsg(message):
-        chat_id = message.chat.id
+        chat_id = str(message.chat.id)
         MsgJs.addToLstInJson(chat_id,message.message_id)
-        markup = types.InlineKeyboardMarkup()
-        markup.add(btn('כן',['Admin', 'send_msg', None]))
-        markup.add(btn('שינוי הודעה',['MainMenu', '5']))
-        markup.add(btn(Home=True))
-        # markup.add(types.InlineKeyboardButton(text='כן',callback_data="['" + Version + "','broad_msg','1']"))
-        # markup.add(types.InlineKeyboardButton(text='שינוי הודעה',callback_data="['" + Version + "','Admin','7']"))
-        # markup.add(types.InlineKeyboardButton(text='לא - חזרה לתפריט',callback_data="['" + Version + "','Menu','0']"))
-        # return markup
-        BroadMessage[chat_id] = message.text
-        deleteByList(chat_id)
-        MsgJs.addToLstInJson(chat_id,bot.send_message(chat_id,
-                                                      "ההודעה שהתקבלה היא:\n" + message.text + "\n האם לשלוח את ההודעה לכלל הלקוחות?",
-                                                      reply_markup=markup).message_id)
+        if message.text == '/start':
+            deleteByList(chat_id)
+            MsgJs.addToLstInJson(chat_id,
+                                 bot.send_message(chat_id,admin_start_txt,reply_markup=mainKeyboard(chat_id)).message_id)
+        else:
+            markup = types.InlineKeyboardMarkup()
+            markup.add(btn('כן',['Admin', 'send_msg', None]))
+            markup.add(btn('שינוי הודעה',['MainMenu', '5']))
+            markup.add(btn(Home=True))
+            BroadMessage[chat_id] = message.text
+            deleteByList(chat_id)
+            MsgJs.addToLstInJson(chat_id,bot.send_message(chat_id,
+                                                          "ההודעה שהתקבלה היא:\n" + message.text + "\n האם לשלוח את ההודעה לכלל הלקוחות?",
+                                                          reply_markup=markup).message_id)
 
     def send_msg(self):
-        if self.call.message.text == '/start':
-            deleteByList(self.chat_id)
-            MsgJs.addToLstInJson(self.chat_id,
-                                 bot.send_message(self.chat_id,admin_start_txt,reply_markup=mainKeyboard(self.chat_id)))
-        else:
-            log.Choice(self.chat_id,"confirmed send broad message")
-            self.sendBroadMsg()
-            deleteByList(self.chat_id)
-            MsgJs.addToLstInJson(self.chat_id,bot.send_message(self.chat_id,"ההודעה נשלחה בהצלחה!\n" + admin_start_txt,
-                                                          reply_markup=mainKeyboard(self.chat_id),
-                                                          parse_mode='Markdown').message_id)
+        log.Choice(self.chat_id,"confirmed send broad message")
+        self.sendBroadMsg()
+        deleteByList(self.chat_id)
+        MsgJs.addToLstInJson(self.chat_id,bot.send_message(self.chat_id,"ההודעה נשלחה בהצלחה!\n" + admin_start_txt,
+                                                      reply_markup=mainKeyboard(self.chat_id),
+                                                      parse_mode='Markdown').message_id)
 
     def sendBroadMsg(self):
-        bot.send_message(SetJs.get("Channels")["broad_msg"],BroadMessage[int(self.chat_id)])
+        bot.send_message(SetJs.get("Channels")["broad_msg"],BroadMessage[self.chat_id])
         clients = DB.get("userdetails")
         for i,cli in clients.iterrows():
             if self.chat_id != cli["user_id"]:
-                bot.send_message(cli["user_id"],BroadMessage[int(self.chat_id)],
+                bot.send_message(cli["user_id"],BroadMessage[self.chat_id],
                                  reply_markup=self.toDeleteKeyboard())  # its ok that the message wasnt saved
 
     def toDeleteKeyboard(self):
