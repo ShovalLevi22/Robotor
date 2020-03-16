@@ -108,9 +108,11 @@ class Appoint(Client,Service):
                     GC.addMail(self.appo_id,self.email)
 
                 if chat_id in SetJs.get("Admins"):
+                    text = '✅ נקבע תור ע"י ' + SetJs.get("Admins_name")[self.chat_id] +" ל"+ self.cli_name + ":\n" + self.serv_name + ', ב-' + goodloking_date(self.date) + ' , ' + self.time[:5]
+                    bot.send_message(SetJs.get("Channels")["update"],text)
                     return "\nהתור נקבע בהצלחה!\n"
                 else:
-                    text ='✅ נקבע תור ע"י '+self.cli_name +",\nל"+ self.serv_name+', ב-' +goodloking_date(self.date) + ' , ' + self.time[:5]
+                    text ='✅ נקבע תור ע"י '+self.cli_name +":\n"+ self.serv_name+', ב-' +goodloking_date(self.date) + ' , ' + self.time[:5]
                     bot.send_message(SetJs.get("Channels")["update"],text)
                 return "\nהתור נקבע בהצלחה !\nנא להגיע בזמן 🤗\n\n"
 

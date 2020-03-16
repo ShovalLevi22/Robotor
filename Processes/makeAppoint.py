@@ -65,12 +65,13 @@ class MakeAppo:
 
 
     def weekKeyboard(self,chat_id,in_use=False):
-        var = datetime.now().isocalendar()[1]
+        var = int(datetime.now().strftime("%U"))
+        # var = datetime.now().isocalendar()[1]
         if not in_use:
             TempUsers[chat_id] = var
         week = int(TempUsers[chat_id])
         markup = types.InlineKeyboardMarkup()
-        lst = self.get_days_list(chat_id)
+        lst = self.get_days_list()
         btns = []
         if (lst == []):
             text = "אין תורים פנויים בשבוע זה נא בחר באפשרות אחרת:"
@@ -111,10 +112,13 @@ class MakeAppo:
         TempUsers[self.chat_id] -= 1
         create_menu(self.call,DatesText,self.weekKeyboard(self.chat_id,in_use=True))
 
-    def get_days_list(self,chat_id):
+    def get_days_list(self):
+
         d = str(datetime.now().date().year) + "-W" + str(int(TempUsers[self.chat_id]) - 1)
         start_date = datetime.strptime(d + '-0',"%Y-W%W-%w").date()
         end_date = (start_date + timedelta(days=6))
+        if start_date < datetime.now().date():
+            start_date = datetime.now().date()
         temp_d = start_date
         lst = []
         while temp_d != end_date + timedelta(days=1):
