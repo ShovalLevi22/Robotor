@@ -175,10 +175,15 @@ def handle_contanct(message):
 def handle_all_button_clicks(call):
     chat_id = str(call.from_user.id)
     try:
-        if (AST(call)[0] == Version):
-            Keyborad_Switcher(call)
-        else:
-            VersionMisMatch(call)
+        if chat_id not in ActiveUsers:
+            ActiveUsers.append(chat_id)
+            if (AST(call)[0] == Version):
+                ActiveUsers.remove(chat_id)
+                Keyborad_Switcher(call)
+            else:
+                ActiveUsers.remove(chat_id)
+                VersionMisMatch(call)
+
     except:
         traceback.print_exc()
         print('chat id -', chat_id, 'in Menu -', AST(call)[1])

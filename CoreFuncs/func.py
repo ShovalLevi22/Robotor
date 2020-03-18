@@ -8,9 +8,6 @@ def VersionMisMatch(call):
     try:
         deleteByList(str(call.message.chat.id))
         MsgJs.addToLstInJson(str(call.message.chat.id), bot.send_message(str(call.message.chat.id),"*היי* 🤩\n הבוט עבר עדכון קטן \n אנא לחץ על על הכפתור על מנת לפתוח את התפריט המעודכן ביותר",reply_markup=onlyToMainKeyboard(), parse_mode='Markdown').message_id)
-        # MsgJs.addToLstInJson(str(call.message.chat.id) ,bot.edit_message_text(chat_id=call.message.chat.id,
-        #                       text="*היי* 🤩\n הבוט עבר עדכון קטן \n אנא לחץ על על הכפתור על מנת לפתוח את התפריט המעודכן ביותר",
-        #                       message_id=call.message.message_id,reply_markup=onlyToMainKeyboard(), parse_mode='Markdown').message_id)
 
     except:
         log.Pass(call.message.chat.id)
@@ -22,18 +19,6 @@ def AST(call):
     except:
         traceback.print_exc()
         return ['0', '0']
-
-# def addToList(List, Key, newValue):
-#     newValue = str(newValue)
-#     try:
-#         tempoList = []
-#         for value in str(List[Key]).split(','):
-#             tempoList.append(value)
-#         tempoList.append(newValue)
-#         myString = ",".join(tempoList)
-#         List[Key] = myString
-#     except KeyError:
-#         List[Key] = newValue
 
 def addToList(List, Key, newValue):
     newValue = str(newValue)
@@ -150,10 +135,10 @@ def check_if_exist(chat_id):
                 date = str(events['start'].get('dateTime'))[:10]
                 time = str(events['start'].get('dateTime'))[11:19]
                 if date != ap["date"]:
-                    DB.update(appoints.table,f"date='{date}'",f"appoint_id='{appo_id}'")
+                    DB.update(appoints.table, f"date='{date}',version='{ap['version']+1}'", f"appoint_id='{appo_id}'")
 
                 if time != ap["time"]:
-                    DB.update(appoints.table,f"time='{time}'",f"appoint_id='{appo_id}'")
+                    DB.update(appoints.table, f"time='{time}',version='{ap['version']+1}'", f"appoint_id='{appo_id}'")
 
     except:
         log.Warn(chat_id)

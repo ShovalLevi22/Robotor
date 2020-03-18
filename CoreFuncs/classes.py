@@ -64,6 +64,7 @@ class Appoint(Client,Service):
        self.time = None
        self.appo_id = None
        self.is_confirmed = None
+       self.version = None
        # self.services = []
        Client.__init__(self, chat_id)
        Service.__init__(self)
@@ -83,6 +84,7 @@ class Appoint(Client,Service):
                 self.chat_id = res['user_id'][0] #only when not Admin
                 self.getUser(self.chat_id)
                 self.is_confirmed = res['is_confirmed'][0]
+                self.version = res['version'][0]
 
         self.appo_id = res['appoint_id'][0]
         self.serv_name = res['service_name'][0]

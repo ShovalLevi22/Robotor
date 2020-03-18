@@ -112,7 +112,7 @@ class DBgetset:
             self.connection.commit()
 
     @wrapper.wrap(w, w.trace_in, w.trace_out)
-    def update(self, table, set, where):  # BUG function isnt ready
+    def update(self, table, set, where,):  # BUG function isnt ready
         self.c.execute(f"UPDATE {table} SET {set} WHERE {where}")
         self.connection.commit()
 
