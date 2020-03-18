@@ -312,8 +312,10 @@ def textShowApp(chat_id, call):
         elif chosen_chois == '3':
             text = "נא בחר/י תור לביטול:"
         else:
+            text = "*התורים שלך:*\n\n"
             for i, ap in result.iterrows():
-                text +='תור ל' + ap["service_name"] + ' נקבע לתאריך ' + goodloking_date(ap["date"]) + ' בשעה ' + ap["time"][:5] + "\n\n"
+                text +='▪️' + ap["service_name"] + ' ב' + goodloking_date(ap["date"]) + ' בשעה ' + ap["time"][:5] + "\n\n"
+
             text += ' כל השעות ע"פ שעון 24 שעות.'
         return text
     except:

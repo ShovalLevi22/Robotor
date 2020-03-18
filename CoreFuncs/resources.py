@@ -107,8 +107,8 @@ class DBgetset:
 
     @wrapper.wrap(w, w.trace_in, w.trace_out)
     def insert(self, table, columns, values):  # BUG function isnt ready
-            self.c.execute(f"INSERT INTO {table} VALUES ({values})")
-            # self.c.execute(f"INSERT INTO {table} ({columns}) VALUES ({values})")
+            # self.c.execute(f"INSERT INTO {table} VALUES ({values})")
+            self.c.execute(f"INSERT INTO {table} ({columns}) VALUES ({values})")
             self.connection.commit()
 
     @wrapper.wrap(w, w.trace_in, w.trace_out)

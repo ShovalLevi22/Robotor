@@ -63,6 +63,7 @@ class Appoint(Client,Service):
        self.date = None
        self.time = None
        self.appo_id = None
+       self.is_confirmed = None
        # self.services = []
        Client.__init__(self, chat_id)
        Service.__init__(self)
@@ -81,6 +82,7 @@ class Appoint(Client,Service):
             else:
                 self.chat_id = res['user_id'][0] #only when not Admin
                 self.getUser(self.chat_id)
+                self.is_confirmed = res['is_confirmed'][0]
 
         self.appo_id = res['appoint_id'][0]
         self.serv_name = res['service_name'][0]
@@ -140,16 +142,16 @@ class Appoint(Client,Service):
         if str(chat_id) in SetJs.get('Admins'):
             try:
                 DB.insert('Admin_appoints','cli_name, cli_phone, service_name, date, time, appoint_id',
-                          f"NULL, '{self.cli_name}','{self.phone}','{self.serv_name}','{self.date}','{self.time}','{self.appo_id}'")
+                          f"'{self.cli_name}','{self.phone}','{self.serv_name}','{self.date}','{self.time}','{self.appo_id}'")
             except:
                 log.Warn('Admin')
 
             cli_id = DB.getOneVal("userdetails","user_id",f"phone_number = '{self.phone}'")
             if cli_id:
-                DB.insert('Appointments','user_id, service_name, appoint_id, date, time',f"'{cli_id}','{self.serv_name}','{self.appo_id}','{self.date}','{self.time}',NULL")
+                DB.insert('Appointments','user_id, service_name, appoint_id, date, time',f"'{cli_id}','{self.serv_name}','{self.appo_id}','{self.date}','{self.time}'")
 
         else:
-            DB.insert('Appointments','user_id, service_name, appoint_id, date, time',f"'{chat_id}','{self.serv_name}','{self.appo_id}','{self.date}','{self.time}',NULL")
+            DB.insert('Appointments','user_id, service_name, appoint_id, date, time',f"'{chat_id}','{self.serv_name}','{self.appo_id}','{self.date}','{self.time}'")
 
     def last_check_avail(self,start,end):
         start = (datetime.strptime(start,'%Y-%m-%d %H:%M:%S')) - timedelta(hours=2)
@@ -172,6 +174,10 @@ class Appoint(Client,Service):
 
             try: #BUG: what if not in admin ?
                 DB.delete("Admin_appoints",f"appoint_id='{self.appo_id}'")
+            except:
+                pass
+
+            try:
                 DB.delete("Appointments",f"appoint_id='{self.appo_id}'")
 
             except:

@@ -143,7 +143,6 @@ def handle_command_start(message, text=''):
 @bot.message_handler(content_types=['contact'])
 def handle_contanct(message):
     chat_id = str(message.chat.id)
-    MsgJs.addToLstInJson(chat_id,message.message_id)
     if chat_id not in ActiveUsers:
         ActiveUsers.append(chat_id)
         log.In(chat_id)
@@ -152,6 +151,7 @@ def handle_contanct(message):
         phone = phone_Refactor(message.contact.phone_number)
         try:
             if str(chat_id) in SetJs.get('Admins'):
+                MsgJs.addToLstInJson(chat_id,message.message_id)
                 if not AppList[chat_id].getUserByPhone(phone):
                     ap.phone = phone
                 ap.cli_name = message.contact.first_name
@@ -162,6 +162,8 @@ def handle_contanct(message):
                 MsgJs.addToLstInJson(chat_id,bot.send_message(chat_id,text=addedText + '\n\n' + AppoHead,
                                                               reply_markup=MakeAppo.serviceKeyboard(),parse_mode='Markdown',
                                                               disable_web_page_preview=True).message_id)
+            else:
+              bot.delete_message(message.chat.id, message.message_id)
 
         except:
             log.Warn(chat_id)
