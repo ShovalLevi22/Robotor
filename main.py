@@ -4,7 +4,7 @@ from Processes.makeAppoint import MakeAppo, DelAppo
 from CoreFuncs.Admin import Admin, Admin_Stock
 from Processes.registration import Registration
 from telebot.apihelper import ApiException
-
+import time
 class MainMenu:
     '''
         ['MainMenu', 'num button']
@@ -14,15 +14,12 @@ class MainMenu:
         self.call = call
         self.chat_id = str(call.from_user.id)
         self.value_from_callback = AST(call)[2] if not init else 0
-        ActiveUsers.append(self.chat_id)
         method_name = 'Button_' + str(self.value_from_callback)
         log.Choice(self.chat_id,"main menu "+method_name)
         method = getattr(self, method_name, lambda: 'Invalid')
         # return method()
         method()
-        ActiveUsers.remove(self.chat_id)
 
-    #
     @staticmethod
     def hacky_init(call):
         MainMenu(call)
@@ -109,7 +106,6 @@ class Keyborad_Switcher:
         self.call = call
         kb_name = AST(call)[1]
         self.chat_id = str(call.from_user.id)
-        # method_name = AST(call)[2]
         method_name = globals()[f'{kb_name}']
         method = getattr(method_name, 'hacky_init', lambda: 'Invalid')
         method(call)
@@ -174,19 +170,23 @@ def handle_contanct(message):
 @bot.callback_query_handler(func=lambda call: True)
 def handle_all_button_clicks(call):
     chat_id = str(call.from_user.id)
-    try:
-        if chat_id not in ActiveUsers:
-            ActiveUsers.append(chat_id)
-            if (AST(call)[0] == Version):
-                ActiveUsers.remove(chat_id)
-                Keyborad_Switcher(call)
-            else:
-                ActiveUsers.remove(chat_id)
-                VersionMisMatch(call)
+    if chat_id not in ActiveUsers:
+        ActiveUsers.append(chat_id)
+        try:
 
-    except:
-        traceback.print_exc()
-        print('chat id -', chat_id, 'in Menu -', AST(call)[1])
+                if (AST(call)[0] == Version):
+                    Keyborad_Switcher(call)
+                else:
+                    VersionMisMatch(call)
+        except:
+            traceback.print_exc()
+            print('chat id -', chat_id, 'in Menu -', AST(call)[1])
+
+        finally:
+            ActiveUsers.remove(chat_id)
+
+
+
 
 
 # Delete unnecessary messages

@@ -6,14 +6,9 @@ class Admin:
 
         self.call = call
         self.chat_id = str(call.from_user.id)
-        ActiveUsers.append(self.chat_id)
-        # self.value = AST(self.call)[3]  # will break if not exists
-        # self.ap = AppList[self.chat_id]
         method_name = AST(call)[2]
         method = getattr(self,method_name,lambda: 'Invalid')
         method()
-        ActiveUsers.remove(self.chat_id)
-
 
     @staticmethod
     def hacky_init(call):

@@ -6,7 +6,7 @@ from telebot import types
 import time
 from datetime import datetime, timedelta
 from CoreFuncs.func import goodloking_date, btn, AST, deleteByList, create_menu
-from settings import DB, GC, bot, ActiveUsers, SetJs
+from settings import DB, GC, bot, SetJs
 MsgRem = Myjson("Files/text/AppoRemindMsg")
 
 
@@ -16,7 +16,6 @@ class SyncAndRemind:
 
         self.call = call
         self.chat_id = str(call.from_user.id)
-        ActiveUsers.append(self.chat_id)
         self.value = AST(self.call)[3]  # will break if not exists #[appo_id,version]
         self.ap = Appoint(self.chat_id)
         is_exist = self.ap.setAppo(self.value)
@@ -29,7 +28,6 @@ class SyncAndRemind:
             method_name = AST(call)[2]
             method = getattr(self, method_name, lambda: 'Invalid')
             method()
-            ActiveUsers.remove(self.chat_id)
 
 
     @staticmethod

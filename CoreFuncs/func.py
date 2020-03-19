@@ -121,16 +121,18 @@ def check_if_exist(chat_id):
     try:
         if str(chat_id) in SetJs.get('Admins'):
             appoints = DB.get("Admin_appoints")
+            table = "Admin_appoints"
 
         else:
             appoints = DB.get("Appointments",where=f"user_id='{chat_id}'")
+            table = "Appointments"
 
         for i,ap in appoints.iterrows():
             appo_id = ap["appoint_id"]
             events = GC.getAppo(appo_id)
             # בדיקת שעה תאריך
             if events['status'] == 'cancelled':
-                DB.delete(appoints.table, where=f"appoint_id='{appo_id}'")
+                DB.delete(table, where=f"appoint_id='{appo_id}'")
             else:
                 date = str(events['start'].get('dateTime'))[:10]
                 time = str(events['start'].get('dateTime'))[11:19]

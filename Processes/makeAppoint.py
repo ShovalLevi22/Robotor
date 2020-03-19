@@ -13,12 +13,9 @@ class MakeAppo:
         self.value = AST(self.call)[3]  # will break if not exists
         self.ap = AppList[self.chat_id]
 
-        if self.chat_id not in ActiveUsers:
-            ActiveUsers.append(self.chat_id)
-            method_name = AST(call)[2]
-            method = getattr(self, method_name, lambda: 'Invalid')
-            method()
-            ActiveUsers.remove(self.chat_id)
+        method_name = AST(call)[2]
+        method = getattr(self, method_name, lambda: 'Invalid')
+        method()
 
 
     @staticmethod
@@ -358,13 +355,10 @@ class DelAppo:
 
         self.call = call
         self.chat_id = str(call.from_user.id)
-        ActiveUsers.append(self.chat_id)
         self.value = AST(self.call)[3]  # will break if not exists
-        # self.ap = AppList[self.chat_id]
         method_name = AST(call)[2]
         method = getattr(self,method_name,lambda: 'Invalid')
         method()
-        ActiveUsers.remove(self.chat_id)
 
     @staticmethod
     def hacky_init(call):
@@ -421,14 +415,15 @@ class DelAppo:
         return markup
 
     def dell_appo(self):
-
         ap = Appoint()
-        ap.setAppo(self.value)
-        if str(self.chat_id) in SetJs.get('Admins'):
-            ap.chat_id = self.chat_id
-        #
-        # else:
-        #     ap.getUser(self.chat_id)
-        txt = ap.delAppo() + "\n" + start_text(self.chat_id)
-        create_menu(self.call,str(txt),mainKeyboard(self.chat_id))
+        exist = ap.setAppo(self.value)
+        if not exist:
+            txt = "תור זה אינו זמין,\n הפעולה *לא* נקלטה במערכת.\n"+start_text(self.chat_id)
+        else:
+            if str(self.chat_id) in SetJs.get('Admins'):
+                ap.chat_id = self.chat_id
+
+            txt = ap.delAppo() + "\n" + start_text(self.chat_id)
+
+        create_menu(self.call, str(txt), mainKeyboard(self.chat_id))
 

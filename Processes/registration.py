@@ -6,7 +6,7 @@ from datetime import time
 from CoreFuncs.classes import Client
 from telebot import types
 from Files.text.Headers import endOFReg
-from settings import ActiveUsers, UserLists
+from settings import UserLists
 
 class Registration:
     """ ['function'] """
@@ -14,12 +14,10 @@ class Registration:
 
         self.message = message
         self.chat_id = str(message.chat.id)
-        ActiveUsers.append(self.chat_id)
         self.cli = UserLists[self.chat_id]
         self.un_regi_txt = txtFromFile('UnregisteredTXT')
         method = getattr(self,method_name,lambda: 'Invalid')
         method()
-        ActiveUsers.remove(self.chat_id)
 
     """ ['Registration', 'function'] """
     @staticmethod
