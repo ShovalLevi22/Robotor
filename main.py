@@ -4,6 +4,7 @@ from Processes.makeAppoint import MakeAppo, DelAppo
 from CoreFuncs.Admin import Admin, Admin_Stock
 from Processes.registration import Registration
 from telebot.apihelper import ApiException
+from CoreFuncs.resources import log
 import time
 class MainMenu:
     '''
@@ -95,7 +96,8 @@ class MainMenu:
 
     # open channels
     def Button_6(self):
-        create_menu(self.call,optionsHead,Admin.chanelsKeyboard())
+        create_menu(self.call, optionsHead, Admin.chanelsKeyboard())
+
 
 class Keyborad_Switcher:
     '''
@@ -104,18 +106,20 @@ class Keyborad_Switcher:
 
     def __init__(self, call):
         self.call = call
-        kb_name = AST(call)[1]
+        self.call_data = AST(call)
+        kb_name = self.call_data[1]
         self.chat_id = str(call.from_user.id)
         method_name = globals()[f'{kb_name}']
         method = getattr(method_name, 'hacky_init', lambda: 'Invalid')
+        log.Info(self.chat_id, f"call:{str(self.call_data)}")
         method(call)
 
 @bot.message_handler(commands=['start'])
-def handle_command_start(message, text=''):
+def handle_command_start(message):
     chat_id = str(message.chat.id)
     log.In(chat_id)
     cleanInfo(chat_id)
-    MsgJs.addToLstInJson(chat_id,message.message_id)
+    MsgJs.addToLstInJson(chat_id, message.message_id)
 
     try:
 
@@ -166,6 +170,9 @@ def handle_contanct(message):
             FinalEx(chat_id)
         finally:
             ActiveUsers.remove(chat_id)
+    else:
+        bot.delete_message(message.chat.id,message.message_id)
+
 # Handlers
 @bot.callback_query_handler(func=lambda call: True)
 def handle_all_button_clicks(call):
@@ -179,8 +186,7 @@ def handle_all_button_clicks(call):
                 else:
                     VersionMisMatch(call)
         except:
-            traceback.print_exc()
-            print('chat id -', chat_id, 'in Menu -', AST(call)[1])
+            log.Warn('handle_all_button_clicks',f"user '{chat_id}' had problem with call:{AST(call)}")
 
         finally:
             ActiveUsers.remove(chat_id)

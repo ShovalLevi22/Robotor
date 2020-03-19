@@ -1,23 +1,19 @@
 import ast
 from settings import *
 from datetime import datetime
-from Files.text.Headers import *
+from Files.text.Headers import admin_start_txt, optionsHead
 from telebot import types
+from CoreFuncs.resources import log
 #Helpers:
 def VersionMisMatch(call):
-    try:
         deleteByList(str(call.message.chat.id))
         MsgJs.addToLstInJson(str(call.message.chat.id), bot.send_message(str(call.message.chat.id),"*היי* 🤩\n הבוט עבר עדכון קטן \n אנא לחץ על על הכפתור על מנת לפתוח את התפריט המעודכן ביותר",reply_markup=onlyToMainKeyboard(), parse_mode='Markdown').message_id)
-
-    except:
-        log.Pass(call.message.chat.id)
-        pass
 
 def AST(call):
     try:
         return ast.literal_eval(call.data)
     except:
-        traceback.print_exc()
+
         return ['0', '0']
 
 def addToList(List, Key, newValue):
@@ -53,15 +49,11 @@ def cleanInfo(chat_id):
 def checkRegistration(chat_id):
     if chat_id in SetJs.get("Admins"):
         return True
-    try:
         count = DB.getOneVal('userdetails', 'COUNT(1)', f"user_id ='{chat_id}'")
         if count == 1:
             return True
         else:
             return False
-    except:
-        log.Warn(chat_id)
-        FinalEx(chat_id)
 
 def deleteByList(chat_id, MsgLst = MsgJs): #BUG: msgList is not optionall, to fix after fixing registration
     try:
@@ -86,7 +78,6 @@ def FinalEx(chat_id):
     log.In(chat_id)
     cleanInfo(chat_id)
     # ActiveUsers.remove(chat_id)
-    log.Info(chat_id,'Information of user deleted from lists before new menu')
     markup =types.InlineKeyboardMarkup()
     if checkRegistration(chat_id):
         markup.add(btn(Home=True))
@@ -167,24 +158,17 @@ def txtFromFile(jsonValue):
 def start_text(chat_id):
     if chat_id in SetJs.get("Admins"):
         names = SetJs.get("Admins_name")
-        txt = f"*היי {names[chat_id]}*" #"היי "  +names[chat_id]+"\n"
-
+        txt = f"*היי {names[chat_id]}*"
         return txt + admin_start_txt
     else:
-        try:
-            name = DB.getOneVal('userdetails','customer_name',f"user_id='{chat_id}'")
+        name = DB.getOneVal('userdetails', 'customer_name', f"user_id='{chat_id}'")
+        if not name:
+            txt = "*היי, *" + txtFromFile('Menu') + "\n" + instagram()
+        else:
             namelist = name.split()
             txt = "*" + "היי " + namelist[0] + "*" + txtFromFile('Menu') + "\n" + instagram()
-            return txt + optionsHead
-        except IndexError:
-            log.Warn(chat_id)
-            print('no user')
-            return 'Backup start text'
-            #BAG: go to registration
-        except:
-            log.Warn(chat_id)
-            FinalEx(chat_id)
-            return 'Backup start text' #BAG: is this the right thing to do? need to check if user is registered
+        return txt + optionsHead
+
 
 def instagram():
     if SetJs.get('InstagramAllow') == '1':

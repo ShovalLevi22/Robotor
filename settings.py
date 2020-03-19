@@ -1,9 +1,10 @@
 import uuid
 # from CoreFuncs.func import *
 import telebot
-from CoreFuncs.resources import *
+from CoreFuncs.resources import Myjson, DBgetset, GCFuncs
 from datetime import timedelta
 from collections import defaultdict
+
 MsgJs = Myjson("Files/Msgs")
 SetJs = Myjson("Files/settings")
 API_TOKEN = SetJs.get('Token')

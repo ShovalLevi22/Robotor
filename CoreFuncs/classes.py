@@ -1,5 +1,6 @@
-from settings import DB, log, GC, SetJs, bot
+from settings import DB, GC, SetJs, bot
 import traceback
+from CoreFuncs.resources import log
 from datetime import datetime, timedelta
 from CoreFuncs.func import goodloking_date
 

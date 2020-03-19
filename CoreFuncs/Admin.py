@@ -51,7 +51,6 @@ class Admin:
 
     @staticmethod
     def textShowAppAdmin(chat_id):
-        try:
             check_if_exist(chat_id)  # check if the appoints are still in the calendar
             result = DB.get('Admin_appoints')
             text = " "
@@ -60,9 +59,6 @@ class Admin:
             else:
                 text += "\nנא בחר/י תור לביטול:"
             return text
-        except:
-            log.Warn(chat_id)
-            FinalEx(chat_id)
 
     @staticmethod
     def AdminCancelAPPKeyboard():

@@ -1,12 +1,13 @@
 
 import re
-from settings import MsgJs, bot, DB, log
+from settings import MsgJs, bot, DB
 from CoreFuncs.func import AST, txtFromFile, deleteByList, btn, send_msg, start_text, mainKeyboard
 from datetime import time
 from CoreFuncs.classes import Client
 from telebot import types
 from Files.text.Headers import endOFReg
 from settings import UserLists
+from CoreFuncs.resources import log
 
 class Registration:
     """ ['function'] """
