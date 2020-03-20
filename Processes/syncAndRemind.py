@@ -77,10 +77,10 @@ class SyncAndRemind:
                             else:
                                 txt = "בתאריך "+goodloking_date(str(dbap.date))
 
-                            # DB.update(table, f"is_confirmed={1}", f"appoint_id='{dbap.appo_id}'")
+                            DB.update(table, f"is_confirmed={1}", f"appoint_id='{dbap.appo_id}'")
                             GC.update_color(dbap.appo_id, '5')
                             text = "היי, יש לך תור " + txt +"ל"+ dbap.serv_name + " בשעה " + dbap.time + " האם את/ה מאשרת את הגעתך?"
-                            log.Info(dbap.chat_id,f"bot send reminder to this user.\n vals: {dbap.serv_name},{goodloking_date(str(dbap.date))},{dbap.time},ap_id-{dbap.appo_id}, txt:{txt}")
+                            # log.Info(dbap.chat_id, f"bot send reminder to this user.\n vals: {dbap.serv_name},{goodloking_date(str(dbap.date))},{dbap.time},ap_id-{dbap.appo_id}, txt:{txt}")
                             bot.send_message(dbap.chat_id, text,
                                              reply_markup=SyncAndRemind.confirm_keyboard(dbap.appo_id, dbap.version),
                                              parse_mode='Markdown',disable_web_page_preview=True)

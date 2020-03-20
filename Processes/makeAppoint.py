@@ -1,6 +1,7 @@
 from CoreFuncs.func import *
 from datetime import datetime,timedelta
 from CoreFuncs.classes import Appoint
+from Files.text.Headers import ServsTexst, DatesText, TimingText
 import time
 
 
@@ -46,7 +47,6 @@ class MakeAppo:
         addToList(TempUsers,self.chat_id,self.value)
         create_menu(self.call,ServsTexst,self.serviceKeyboard(TempUsers[self.chat_id]))
 
-
     def unselect_service(self):
         TempUsers[self.chat_id].remove(self.value)
         create_menu(self.call,ServsTexst,self.serviceKeyboard(TempUsers[self.chat_id]))
@@ -60,8 +60,6 @@ class MakeAppo:
         else:
             txt = "*שים/י ❤ לא בחרת שירות רצוי,*\n"
             create_menu(self.call,txt+ServsTexst,self.serviceKeyboard(self.chat_id))
-
-
 
     def weekKeyboard(self,chat_id,in_use=False):
         var = int(datetime.now().strftime("%U"))

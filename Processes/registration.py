@@ -2,12 +2,12 @@
 import re
 from settings import MsgJs, bot, DB
 from CoreFuncs.func import AST, txtFromFile, deleteByList, btn, send_msg, start_text, mainKeyboard
-from datetime import time
 from CoreFuncs.classes import Client
 from telebot import types
 from Files.text.Headers import endOFReg
-from settings import UserLists
+from settings import UserLists, SetJs
 from CoreFuncs.resources import log
+import time
 
 class Registration:
     """ ['function'] """
@@ -27,12 +27,14 @@ class Registration:
         Registration(call.message, method_name)
 
     @staticmethod
-    def next_step_reg(chat_id):
-        msg = bot.send_message(chat_id,txtFromFile('UnregisteredTXT') + "\n\n* מה השם המלא שלך?*\n\n",
-                               parse_mode='Markdown')
-        bot.register_next_step_handler(msg,Registration,'process_name_step')
-        deleteByList(chat_id)
-        MsgJs.addToLstInJson(chat_id,msg.message_id)
+    def next_step_reg(chat_id, txt=""):
+        txt += txtFromFile('UnregisteredTXT') + "\n\n* מה השם המלא שלך?*\n\n"
+        msg = send_msg(chat_id, txt)
+        bot.register_next_step_handler(msg, Registration, 'process_name_step')
+        #
+        # msg = bot.send_message(chat_id, txt,parse_mode='Markdown')
+        # deleteByList(chat_id)
+        # MsgJs.addToLstInJson(chat_id,msg.message_id)
 
     def process_name_step(self):
         MsgJs.addToLstInJson(self.chat_id,self.message.message_id)
@@ -85,8 +87,7 @@ class Registration:
             if (message.content_type == 'text'):
                 email = message.text
                 if email == '/start' or email == '/חדש':
-                    time.sleep(0.01)
-                    deleteByList(self.chat_id)
+                    # deleteByList(self.chat_id)
                     self.next_step_reg(self.chat_id)
 
                 elif email == "דלג":
@@ -94,11 +95,7 @@ class Registration:
                            "*שם מלא:* " + self.cli.cli_name + "\n" \
                                                          "*מספר טלפון:* " + self.cli.phone + "\n" \
                                                                                         "האם את/ה מאשר/ת כי אלו הפרטים הנכונים?"
-                    send_msg(self.chat_id,text,reply_m = self.confirm_reg())
-                    # deleteByList(self.chat_id)
-                    # MsgJs.addToLstInJson(self.chat_id,
-                    #                      bot.send_message(self.chat_id,text,reply_markup=self.confirm_reg(), parse_mode='Markdown',
-                    #                                       disable_web_page_preview=True).message_id)
+                    send_msg(self.chat_id, text, reply_m=self.confirm_reg())
 
 
                 elif self.check_email(email):
@@ -108,23 +105,14 @@ class Registration:
                                                          "*מספר טלפון:* " + self.cli.phone + "\n" \
                                                                                         "*מייל:* " + email + "\n" \
                                                                                                              "האם את/ה מאשר/ת כי אלו הפרטים הנכונים?"
-                    send_msg(self.chat_id, text, reply_m = self.confirm_reg())
-
-                    # msg = bot.send_message(self.chat_id,text,reply_markup=self.confirm_reg(),parse_mode='Markdown',
-                    #                        disable_web_page_preview=True)
-                    # deleteByList(self.chat_id)
-                    # MsgJs.addToLstInJson(self.chat_id,msg.message_id)
+                    send_msg(self.chat_id, text, reply_m=self.confirm_reg())
 
                 else:
-                    msg = send_msg(self.chat_id,"אנא ודא/י שהמייל שהכנסת הינו תקין, נסה/י שוב",delete=False)
-
-                    # msg = bot.send_message(self.chat_id,"אנא ודא/י שהמייל שהכנסת הינו תקין, נסה/י שוב")
-                    # MsgJs.addToLstInJson(self.chat_id,msg.message_id)
+                    msg = send_msg(self.chat_id, "אנא ודא/י שהמייל שהכנסת הינו תקין, נסה/י שוב", delete=False)
                     bot.register_next_step_handler(msg,self.process_email_step)
             else:
-                msg = bot.send_message(self.chat_id,"אנא השתמשו בטקסט בלבד,\n רשמו את המייל שלכם, או 'דלג' ללא מרכאות")
-                MsgJs.addToLstInJson(self.chat_id,msg.message_id)
-                bot.register_next_step_handler(msg,self.process_email_step)
+                msg = send_msg(self.chat_id, "אנא השתמשו בטקסט בלבד,\n רשמו את המייל שלכם, או 'דלג' ללא מרכאות", delete=False)
+                bot.register_next_step_handler(msg, self.process_email_step)
 
         except Exception as e:
             # bot.reply_to(message, print(e))
@@ -146,16 +134,13 @@ class Registration:
 
     def conf_reg(self):
         try:
-            DB.insert("userdetails",'*',f"'{self.chat_id}','{self.cli.cli_name}','{self.cli.phone}','{self.cli.email}',NULL")
+            DB.insert("userdetails", 'user_id, customer_name, phone_number, email', f"'{self.chat_id}','{self.cli.cli_name}','{self.cli.phone}','{self.cli.email}'")
         except:
-            txt = '@@@CAUTION!!!!!!!!!!!!!@@@\nCant insert User!!\n' + \
-                  'Chat ID-' + self.chat_id + '\n' + \
-                  'Name-' + self.cli.cli_name + '\n' + \
-                  'Phone-' + self.cli.phone + '\n'
-            log.Warn(self.chat_id,txt)
-        deleteByList(self.chat_id)
-        msg = bot.send_message(self.chat_id,endOFReg + '\n' + start_text(self.chat_id), reply_markup=mainKeyboard(self.chat_id), parse_mode='Markdown', disable_web_page_preview=True)
-        MsgJs.addToLstInJson(self.chat_id,msg.message_id)
+            log.Warn(self.chat_id) #BUG: mybe not needed
+
+        txt = f"{self.cli.cli_name}"+" נרשמ/ה לבוט!"
+        bot.send_message(SetJs.get("Channels")["update"], txt)
+        send_msg(self.chat_id, endOFReg + '\n' + start_text(self.chat_id), mainKeyboard(self.chat_id))
 
     def restart(self):
         self.next_step_reg(self.chat_id)

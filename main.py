@@ -5,7 +5,7 @@ from CoreFuncs.Admin import Admin, Admin_Stock
 from Processes.registration import Registration
 from telebot.apihelper import ApiException
 from CoreFuncs.resources import log
-import time
+from Files.text.Headers import ServsTexst, AppoHead
 class MainMenu:
     '''
         ['MainMenu', 'num button']
@@ -26,8 +26,11 @@ class MainMenu:
         MainMenu(call)
 
     def Button_0(self):
-        cleanInfo(self.chat_id)
-        return create_menu(self.call,start_text(self.chat_id),mainKeyboard(self.chat_id))
+        if not checkRegistration(self.chat_id):
+            Registration.next_step_reg(self.chat_id)
+        else:
+            cleanInfo(self.chat_id)
+            return create_menu(self.call, start_text(self.chat_id), mainKeyboard(self.chat_id))
 
     def Button_1(self):
         if self.chat_id in SetJs.get("Admins"):
@@ -159,7 +162,7 @@ def handle_contanct(message):
                 addedText = 'קבע תור ל -\n *שם:*' + ap.cli_name + '\n*פלאפון: *' + ap.phone
                 bot.delete_message(message.chat.id,message.message_id)
                 deleteByList(chat_id)
-                MsgJs.addToLstInJson(chat_id,bot.send_message(chat_id,text=addedText + '\n\n' + AppoHead,
+                MsgJs.addToLstInJson(chat_id, bot.send_message(chat_id,text=addedText + '\n\n' + AppoHead,
                                                               reply_markup=MakeAppo.serviceKeyboard(),parse_mode='Markdown',
                                                               disable_web_page_preview=True).message_id)
             else:
@@ -200,8 +203,19 @@ def handle_all_button_clicks(call):
                                     'video_note', 'voice', 'contact',
                                     'sticker', 'location', 'document'])
 def deleteMessage(message):
-    if (message.chat.type == 'private'):
-        bot.delete_message(message.chat.id, message.message_id)
+    chat_id = str(message.chat.id)
+    if not checkRegistration(chat_id):
+        if chat_id in UserLists:
+            bot.delete_message(message.chat.id, message.message_id)
+        else:
+            MsgJs.addToLstInJson(chat_id, message.message_id)
+            Registration.next_step_reg(chat_id, "במהלך ההרשמה בוצע אתחול,\n יש להתחיל את תהליך ההרשמה פעם נוספת.\n")
+
+    elif (message.chat.type == 'private'):
+        bot.delete_message(chat_id, message.message_id)
+
+
+
 
 import threading
 from Processes.syncAndRemind import SyncAndRemind

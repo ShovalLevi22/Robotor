@@ -4,17 +4,24 @@ from datetime import datetime
 from Files.text.Headers import admin_start_txt, optionsHead
 from telebot import types
 from CoreFuncs.resources import log
+
 #Helpers:
 def VersionMisMatch(call):
-        deleteByList(str(call.message.chat.id))
-        MsgJs.addToLstInJson(str(call.message.chat.id), bot.send_message(str(call.message.chat.id),"*היי* 🤩\n הבוט עבר עדכון קטן \n אנא לחץ על על הכפתור על מנת לפתוח את התפריט המעודכן ביותר",reply_markup=onlyToMainKeyboard(), parse_mode='Markdown').message_id)
+    chat_id = str(call.message.chat.id)
+    txt = "*היי* 🤩\n הבוט עבר עדכון קטן \n אנא לחץ על על הכפתור על מנת לפתוח את התפריט המעודכן ביותר"
+    send_msg(chat_id, txt, onlyToMainKeyboard())
+    # deleteByList(str(call.message.chat.id))
+    # MsgJs.addToLstInJson(str(call.message.chat.id), bot.send_message(str(call.message.chat.id),"*היי* 🤩\n הבוט עבר עדכון קטן \n אנא לחץ על על הכפתור על מנת לפתוח את התפריט המעודכן ביותר",reply_markup=onlyToMainKeyboard(), parse_mode='Markdown').message_id)
+
 
 def AST(call):
     try:
         return ast.literal_eval(call.data)
     except:
-
-        return ['0', '0']
+        log.Warn()
+        # return False
+        raise Exception
+        # return False #BUG: should we do final exe?
 
 def addToList(List, Key, newValue):
     newValue = str(newValue)
@@ -25,53 +32,47 @@ def addToList(List, Key, newValue):
             List[Key] = [newValue]
     except:
         log.Warn(Key)
-        FinalEx()
+        return False
 
 def goodloking_date(str_date):
     try:
         date = datetime.strptime(str_date, '%Y-%m-%d')
         day = date.weekday()
         txtday = datetime.strftime(date,"%d.%m.%y") +" יום-"+ WeekDays[day]
-
         return txtday
+
     except:
-        return 'Error'
+        log.Info("'goodloking_date'", f"error with date {str_date}")
+        return str_date
 
 def cleanInfo(chat_id):
     AppList.pop(chat_id, None)
     UserLists.pop(chat_id, None)
     TempLongList.pop(chat_id, None)
     StockChange.pop(chat_id, None)
-    TempUsers.pop(str(chat_id),None)
-
-    # ActiveUsers.remove(chat_id)
+    TempUsers.pop(str(chat_id), None)
 
 def checkRegistration(chat_id):
     if chat_id in SetJs.get("Admins"):
         return True
-        count = DB.getOneVal('userdetails', 'COUNT(1)', f"user_id ='{chat_id}'")
-        if count == 1:
-            return True
-        else:
-            return False
+    count = DB.getOneVal('userdetails', 'COUNT(1)', f"user_id ='{chat_id}'")
+    if count == 1:
+        return True
+    else:
+        return False
 
 def deleteByList(chat_id, MsgLst = MsgJs): #BUG: msgList is not optionall, to fix after fixing registration
-    try:
         msgList = MsgLst.get()
         for value in msgList[str(chat_id)]:
                 try:
                     bot.delete_message(chat_id, value)
-                except Exception as d:
-                    # log.Pass(chat_id)
+                except:
                     pass
         try:
             MsgLst.delVal(chat_id)
-        except Exception as d:
-            log.Pass(chat_id)
+        except:
             pass
-    except KeyError:
-        log.Pass(chat_id)
-        pass
+
 
 def FinalEx(chat_id):
     deleteByList(chat_id)
@@ -96,8 +97,8 @@ def startTime(date):
         day = date.weekday()
         return DB.getOneVal('WorkTime',select= 'start', where=f"day_num='{day}'")
     except:
-        print('Couldnt get startTime')
-        traceback.print_exc()
+        log.Warn(msg="Couldnt get startTime")
+        FinalEx()
 
 def endTime(date):
     try:
@@ -105,8 +106,8 @@ def endTime(date):
         day = date.weekday()
         return DB.getOneVal('WorkTime',select='end',where=f"day_num='{day}'")
     except:
-        print('Couldnt get endTime')
-        traceback.print_exc()
+        log.Warn(msg='Couldnt get endTime')
+        FinalEx()
 
 def check_if_exist(chat_id):
     try:
@@ -118,7 +119,7 @@ def check_if_exist(chat_id):
             appoints = DB.get("Appointments",where=f"user_id='{chat_id}'")
             table = "Appointments"
 
-        for i,ap in appoints.iterrows():
+        for i, ap in appoints.iterrows():
             appo_id = ap["appoint_id"]
             events = GC.getAppo(appo_id)
             # בדיקת שעה תאריך
@@ -217,20 +218,17 @@ def create_menu(call, text1, reply_m, string='default'):
                               reply_markup=reply_m,
                               parse_mode='Markdown',
                               disable_web_page_preview=True)
-    except telebot.apihelper.ApiException:
-        log.Pass(chat_id)
-        pass
 
     except:
         log.Warn(chat_id)
         FinalEx(chat_id)
 
 def send_msg(chat_id, text, reply_m = None, delete = True):
-    msg = bot.send_message(chat_id,text,reply_markup=reply_m, parse_mode='Markdown',
+    msg = bot.send_message(chat_id, text, reply_markup=reply_m, parse_mode='Markdown',
                            disable_web_page_preview=True)
     if delete:
         deleteByList(chat_id)
-    MsgJs.addToLstInJson(chat_id,msg.message_id)
+    MsgJs.addToLstInJson(chat_id, msg.message_id)
     return msg
 
 def mainKeyboard(chat_id):
@@ -244,12 +242,6 @@ def mainKeyboard(chat_id):
         markup.add(btn(" פרטי השירותים שלי ✍",["MainMenu",'4']))
         markup.add(btn(" שליחת הודעת תפוצה 📨",["MainMenu",'5']))
         markup.add(btn(" ערוצים ↖️",["MainMenu",'6']))
-
-        # markup.add(types.InlineKeyboardButton(text=" צפייה בתורים עתידיים 📖", callback_data="['" + Version + "','Admin','6']")), \
-        # markup.add(types.InlineKeyboardButton(text=" ביטול תור עתידי ✖️", callback_data="['" + Version + "','Admin','2']")), \
-        # markup.add(types.InlineKeyboardButton(text=" פרטי השירותים שלי ✍", callback_data="['" + Version + "','Admin','3']")), \
-        # markup.add(types.InlineKeyboardButton(text=" שליחת הודעת תפוצה 📨", callback_data="['" + Version + "','Admin','7']")), \
-        # markup.add(types.InlineKeyboardButton(text=" ערוצים ↖️", callback_data="['" + Version + "','Admin','8']"))#, \
 
     else:
         # main buttons
@@ -293,26 +285,8 @@ def textShowApp(chat_id, call):
         log.Warn(chat_id)
         FinalEx(chat_id)
 
-# def cancelAPPKeyboard(chat_id):
-#     try:
-#         appoints = DB.get("Appointments",where=f"user_id={chat_id}",order="date, time")
-#         markup = types.InlineKeyboardMarkup()
-#         for i,ap in appoints.iterrows():
-#             text = ap["service_name"] + ' ב- ' + goodloking_date(ap["date"]) + ' ,' + ap["time"][:5]
-#             markup.add(btn(text,['All','DelAppo','to_confirm_del_keyboard',str(ap["appoint_id"])]))
-#
-#             markup.add(
-#                 types.InlineKeyboardButton(text=text,callback_data="['" + Version + "','delete','" + str(
-#                     ap["appoint_id"]) + "']"))
-#     except:
-#         pass
-#
-#     markup.add(
-#         types.InlineKeyboardButton(text="חזרה לתפריט הראשי 🏠",callback_data="['" + Version + "','Menu','0']"))
-#     return markup
-
 def confirmDelKeyboard(appo_indexer=None):
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton(text='כן', callback_data="['" + Version + "','confirm','yesdel','" + appo_indexer + "']"))
-    markup.add(types.InlineKeyboardButton(text='לא',callback_data="['" + Version + "','Menu','0']"))
+    markup.add(types.InlineKeyboardButton(text='לא', callback_data="['" + Version + "','Menu','0']"))
     return markup

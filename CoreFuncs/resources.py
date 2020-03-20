@@ -8,7 +8,7 @@ import pandas as pd
 import os.path
 import pickle
 from googleapiclient.discovery import build
-from CoreFuncs.func import FinalEx
+# from CoreFuncs.func import FinalEx
 
 
 class Log(Exception):
@@ -44,18 +44,18 @@ class wrapper:
 
     def wrap(self,pre,post):
         def decorate(func):
-            def call(*args,**kwargs):
-                pre(self,func,*args,**kwargs)
+            def call(*args, **kwargs):
+                pre(self, func, *args, **kwargs)
                 try:
                     logging.info(f"function {self.activator}.{func.__name__} activated")
                     # log.Info(self.activator, f"activate func '{func.__name__}'")
-                    result = func(*args,**kwargs)
+                    result = func(*args, **kwargs)
                 except:
-                    logging.warning(str(self.activator) + f": func:{func.__name__}, args:{kwargs}-> ",
+                    logging.warning(str(self.activator) + f": func:{func.__name__}, args:{args[1:]},\n kwargs:{kwargs}->\n ",
                                     exc_info=True)
 
                     # log.Warn(self.activator,f"func:{func.__name__}, args:{kwargs}")
-                post(self,func,*args,**kwargs)
+                post(self, func, *args, **kwargs)
                 return result
 
             return call
@@ -95,13 +95,13 @@ class Myjson:
         with open(self.file,'w') as outfile:
             json.dump(data,outfile,ensure_ascii=False)
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
-    def delVal(self,key):
+    @wrapper.wrap(w, w.trace_in,w.trace_out)
+    def delVal(self, key):
         with open(self.file) as json_file:
             data = json.load(json_file)
-            data.pop(key,None)
+            data.pop(key, None)
 
-        with open(self.file,'w') as outfile:
+        with open(self.file, 'w') as outfile:
             json.dump(data,outfile)
 
 
@@ -112,13 +112,13 @@ class DBgetset:
         self.connection = sqlite3.connect(db_name,check_same_thread=False)
         self.c = self.connection.cursor()
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
-    def get(self,table,select='*',where=1,order=1):
+    @wrapper.wrap(w, w.trace_in, w.trace_out)
+    def get(self, table, select='*', where=1, order=1):
         SQL_Query = pd.read_sql_query(f"SELECT {select} FROM {table} WHERE {where} ORDER BY {order}",self.connection)
         return SQL_Query
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
-    def delete(self,table,where):  # BUG function isnt ready
+    @wrapper.wrap(w, w.trace_in, w.trace_out)
+    def delete(self, table, where):  # BUG function isnt ready
         try:
             self.c.execute(f"DELETE FROM {table} WHERE {where}")
             self.connection.commit()
@@ -127,14 +127,14 @@ class DBgetset:
             return False
 
     @wrapper.wrap(w,w.trace_in,w.trace_out)
-    def insert(self,table,columns,values):  # BUG function isnt ready
+    def insert(self, table, columns, values):  # BUG function isnt ready
         # self.c.execute(f"INSERT INTO {table} VALUES ({values})")
         self.c.execute(f"INSERT INTO {table} ({columns}) VALUES ({values})")
         self.connection.commit()
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
-    def update(self,table,set,where,):  # BUG function isnt ready
-        log.Info()
+    @wrapper.wrap(w, w.trace_in, w.trace_out)
+    def update(self, table, set, where,):  # BUG function isnt ready
+        # log.Info()
         self.c.execute(f"UPDATE {table} SET {set} WHERE {where}")
         self.connection.commit()
 
@@ -147,15 +147,14 @@ class DBgetset:
         return (res[0][0])
 
 
-
 class GCFuncs:
     w = wrapper("GCFuncs")
 
     def __init__(self):
         self.service = self.get_calendar_service()
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
-    def addAppo(self,start,end,summary,description):
+    @wrapper.wrap(w,w.trace_in, w.trace_out)
+    def addAppo(self, start, end, summary, description):
 
         try:
             event_result = self.service.events().insert(calendarId='primary',
@@ -172,8 +171,8 @@ class GCFuncs:
             #            'arguments:\n summary: ' + summary + '\n description: ' + description + '\n start: ' + ap.start + '\n end: ' + ap.end + '\n')
             pass
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
-    def getAppo(self,appo_id):
+    @wrapper.wrap(w, w.trace_in, w.trace_out)
+    def getAppo(self, appo_id):
 
         try:
             events = self.service.events().get(calendarId='primary',eventId=appo_id).execute()
@@ -182,8 +181,8 @@ class GCFuncs:
             # log.Pass(str(chat_id))
             pass
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
-    def getAppoList(self,start,end):
+    @wrapper.wrap(w,w.trace_in, w.trace_out)
+    def getAppoList(self, start, end):
         try:
             events_result = self.service.events().list(calendarId='primary',timeMin=start,timeMax=end,
                                                        maxResults=100,singleEvents=True,
@@ -193,8 +192,8 @@ class GCFuncs:
             # Log().Pass(str(chat_id))
             pass
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
-    def delAppo(self,appo_id):
+    @wrapper.wrap(w, w.trace_in, w.trace_out)
+    def delAppo(self, appo_id):
 
         try:
             events = self.service.events().delete(calendarId='primary',eventId=appo_id).execute()
