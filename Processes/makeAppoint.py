@@ -7,7 +7,7 @@ import time
 
 class MakeAppo:
     """ ['MakeAppo', 'function', value] """
-    def __init__(self,call):
+    def __init__(self, call):
 
         self.call = call
         self.chat_id = str(call.from_user.id)
@@ -32,13 +32,13 @@ class MakeAppo:
         for i,srv in services.iterrows():
             if str(srv["service_id"]) in chosen_servs:
                 text = " ✅ " + str(srv["service_name"]) + "- ₪" + str(srv["price"]) + ""
-                markup.add(btn(text,['MakeAppo','unselect_service',str(srv["service_id"])]))
+                markup.add(btn(text, ['MakeAppo', 'unselect_service', str(srv["service_id"])]))
 
             else:
                 text = str(srv["service_name"]) + "- ₪" + str(srv["price"]) + ""
-                markup.add(btn(text,['MakeAppo','select_service',str(srv["service_id"])]))
+                markup.add(btn(text, ['MakeAppo', 'select_service', str(srv["service_id"])]))
 
-        markup.add(btn("הבא ⬅️",['MakeAppo','set_services',None]))
+        markup.add(btn("הבא ⬅️", ['MakeAppo', 'set_services', None]))
         markup.add(btn(Home=True))
 
         return markup
@@ -55,28 +55,40 @@ class MakeAppo:
         if TempUsers[self.chat_id]: #if user chose services
             self.ap.setServiceDetails(TempUsers[self.chat_id])
             TempUsers.pop(self.chat_id)
-            create_menu(self.call,DatesText,self.weekKeyboard(self.chat_id))
+            create_menu(self.call, DatesText, self.weekKeyboard(self.chat_id))
 
         else:
             txt = "*שים/י ❤ לא בחרת שירות רצוי,*\n"
             create_menu(self.call,txt+ServsTexst,self.serviceKeyboard(self.chat_id))
 
-    def weekKeyboard(self,chat_id,in_use=False):
-        var = int(datetime.now().strftime("%U"))
+    def weekKeyboard(self, chat_id, add_to_week=0, in_use=False):
+        this_week = int(datetime.now().strftime("%U"))
         # var = datetime.now().isocalendar()[1]
         if not in_use:
-            TempUsers[chat_id] = var
-        week = int(TempUsers[chat_id])
+            TempUsers[chat_id] = {'start': this_week, 'add': 0}
+        else:
+            TempUsers[chat_id]['add'] = int(TempUsers[chat_id]['add']) + add_to_week
+        cur_week = int(TempUsers[chat_id]['start']) + int(TempUsers[chat_id]['add'])
         markup = types.InlineKeyboardMarkup()
         lst = self.get_days_list()
         btns = []
+
         if (lst == []):
-            text = "אין תורים פנויים בשבוע זה נא בחר באפשרות אחרת:"
-            create_menu(chat_id,text,self.weekKeyboard(self.chat_id))  # BUG: check if work good
+            if cur_week == this_week + SetJs.get("SchedualWeeksLimit"):
+                return False# no more available dates
+            # TempUsers[self.chat_id] += 1
+            if in_use and add_to_week == 0:
+                add_to_week = 0 #not relevan?
+                TempUsers[chat_id]['start'] += 1
+            if not in_use:
+                TempUsers[chat_id]['start'] += 1
+
+            return self.weekKeyboard(self.chat_id, add_to_week=add_to_week, in_use=True)
+            # create_menu(self.call, DatesText, self.weekKeyboard(self.chat_id, add_to_week=add_to_week))  # BUG: check if work good
         else:
             count = 0
             for date in lst:
-                btns.insert(0,btn(self.keyboard_date(str(date)),['MakeAppo','select_date',date]))
+                btns.insert(0, btn(self.keyboard_date(str(date)), ['MakeAppo', 'select_date', date]))
                 count += 1
                 if count == 3:
                     markup.add(*btns)
@@ -85,16 +97,13 @@ class MakeAppo:
             if btns != []:
                 markup.add(*btns)
                 btns = []
-            if week != var + SetJs.get("SchedualWeeksLimit"):
-                btns.append(btn("שבוע הבא ◀️ ",['MakeAppo','next_week',None]))
-            if week != var:
-                btns.append(btn("▶️ שבוע קודם",['MakeAppo','last_week',None]))
+            if cur_week != this_week + SetJs.get("SchedualWeeksLimit"):
+                btns.append(btn("שבוע הבא ◀️ ", ['MakeAppo', 'next_week', None]))
+            if cur_week != TempUsers[chat_id]['start']:
+                btns.append(btn("▶️ שבוע קודם", ['MakeAppo', 'last_week', None]))
             markup.add(*btns)
-            # markup.add(types.InlineKeyboardButton(text="בתאריך אחר",callback_data="['" + Version + "','how_long','0']")), \
-            # markup.add(
-            #     types.InlineKeyboardButton(text="חזרה לתפריט הראשי 🏠",callback_data="['" + Version + "','Menu','0']"))
             markup.add(btn(Home=True))
-        return markup
+            return markup
 
     def select_date(self):
         self.ap.date = self.value
@@ -102,16 +111,16 @@ class MakeAppo:
                     self.timeKeyboard(self.chat_id,str(self.ap.date)))
 
     def next_week(self):
-        TempUsers[self.chat_id] += 1
-        create_menu(self.call,DatesText,self.weekKeyboard(self.chat_id,in_use=True))
+        # TempUsers[self.chat_id] += 1
+        create_menu(self.call, DatesText, self.weekKeyboard(self.chat_id, add_to_week=1, in_use=True))
 
     def last_week(self):
-        TempUsers[self.chat_id] -= 1
-        create_menu(self.call,DatesText,self.weekKeyboard(self.chat_id,in_use=True))
+        # TempUsers[self.chat_id] -= 1
+        create_menu(self.call, DatesText, self.weekKeyboard(self.chat_id, add_to_week=-1, in_use=True))
 
     def get_days_list(self):
 
-        d = str(datetime.now().date().year) + "-W" + str(int(TempUsers[self.chat_id]) - 1)
+        d = str(datetime.now().date().year) + "-W" + str(int(TempUsers[self.chat_id]['start']+TempUsers[self.chat_id]['add']) - 1)
         start_date = datetime.strptime(d + '-0',"%Y-W%W-%w").date()
         end_date = (start_date + timedelta(days=6))
         if start_date < datetime.now().date():

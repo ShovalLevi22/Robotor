@@ -38,7 +38,7 @@ def goodloking_date(str_date):
     try:
         date = datetime.strptime(str_date, '%Y-%m-%d')
         day = date.weekday()
-        txtday = datetime.strftime(date,"%d.%m.%y") +" יום-"+ WeekDays[day]
+        txtday =" יום-"+ WeekDays[day] + datetime.strftime(date, "%d.%m.%y")
         return txtday
 
     except:
@@ -63,13 +63,16 @@ def checkRegistration(chat_id):
 
 def deleteByList(chat_id, MsgLst = MsgJs): #BUG: msgList is not optionall, to fix after fixing registration
         msgList = MsgLst.get()
-        for value in msgList[str(chat_id)]:
-                try:
-                    bot.delete_message(chat_id, value)
-                except:
-                    pass
         try:
-            MsgLst.delVal(chat_id)
+            for value in msgList[str(chat_id)]:
+                    try:
+                        bot.delete_message(chat_id, value)
+                    except:
+                        pass
+            try:
+                MsgLst.delVal(chat_id)
+            except:
+                pass
         except:
             pass
 

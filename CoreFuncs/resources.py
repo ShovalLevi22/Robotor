@@ -11,7 +11,7 @@ from googleapiclient.discovery import build
 # from CoreFuncs.func import FinalEx
 
 
-class Log(Exception):
+class Log():
     def __init__(self):
         logging.basicConfig(filename='bot.log',filemode='w',format='%(asctime)s - %(message)s',level=logging.INFO)
         self.func_name = traceback.extract_stack(None,2)[0][2]
@@ -38,16 +38,16 @@ log = Log()
 
 
 class wrapper:
-    def __init__(self,activator='Unknown'):
+    def __init__(self, activator='Unknown'):
         self.mutex = Lock()
         self.activator = activator
 
-    def wrap(self,pre,post):
+    def wrap(self, pre, post):
         def decorate(func):
             def call(*args, **kwargs):
                 pre(self, func, *args, **kwargs)
                 try:
-                    logging.info(f"function {self.activator}.{func.__name__} activated")
+                    # logging.info(f"function {self.activator}.{func.__name__} activated")
                     # log.Info(self.activator, f"activate func '{func.__name__}'")
                     result = func(*args, **kwargs)
                 except:
@@ -62,23 +62,23 @@ class wrapper:
 
         return decorate
 
-    def trace_in(self,func,*args,**kwargs):
+    def trace_in(self, func, *args, **kwargs):
         self.mutex.acquire(1)
 
-    def trace_out(self,func,*args,**kwargs):
+    def trace_out(self, func, *args, **kwargs):
         self.mutex.release()
 
 
 class Myjson:
     w = wrapper("Myjson")
 
-    def __init__(self,file_path):
+    def __init__(self, file_path):
         self.file = file_path + '.json'
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
+    @wrapper.wrap(w, w.trace_in, w.trace_out)
     def get(self,key=False):
-        with open(self.file,encoding='utf-8') as json_file:
-            data = json.loads(json_file.read(),encoding='utf-8')
+        with open(self.file, encoding='utf-8') as json_file:
+            data = json.loads(json_file.read(), encoding='utf-8')
             if not key:
                 return data
             elif key in data:
@@ -90,7 +90,7 @@ class Myjson:
     def addToLstInJson(self, key, value):
         key = str(key)
         with open(self.file,encoding='utf-8') as json_file:
-            data = json.loads(json_file.read(),encoding='utf-8')
+            data = json.loads(json_file.read(), encoding='utf-8')
             data.setdefault(key, []).append(value)
         with open(self.file,'w') as outfile:
             json.dump(data,outfile,ensure_ascii=False)
@@ -216,7 +216,7 @@ class GCFuncs:
                 body={'colorId': color},).execute()
         except:
             print('Could not update color')
-            traceback.print_exc()
+            # traceback.print_exc()
 
     def get_calendar_service(self):
         creds = None
