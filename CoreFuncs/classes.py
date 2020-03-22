@@ -72,20 +72,20 @@ class Appoint(Client,Service):
 
     def setAppo(self,appo_id):
         #BUG: check if appo exists
-        res = DB.get('Admin_appoints',where=f"appoint_id='{appo_id}'")
+        res = DB.get('Appointments', where=f"appoint_id='{appo_id}'")
         if not res.empty:
-            self.cli_name = res['cli_name'][0]
-            self.phone = res['cli_phone'][0]
+            self.chat_id = res['user_id'][0]  # only when not Admin
+            self.getUser(self.chat_id)
+            self.is_confirmed = res['is_confirmed'][0]
+            self.version = res['version'][0]
 
         else:
-            res = DB.get('Appointments',where=f"appoint_id='{appo_id}'")
+            res = DB.get('Admin_appoints', where=f"appoint_id='{appo_id}'")
             if res.empty:
                 return False
             else:
-                self.chat_id = res['user_id'][0] #only when not Admin
-                self.getUser(self.chat_id)
-                self.is_confirmed = res['is_confirmed'][0]
-                self.version = res['version'][0]
+                self.cli_name = res['cli_name'][0]
+                self.phone = res['cli_phone'][0]
 
         self.appo_id = res['appoint_id'][0]
         self.serv_name = res['service_name'][0]
@@ -93,11 +93,11 @@ class Appoint(Client,Service):
         self.date = res['date'][0]
         return True
 
-    def book_apoint(self,chat_id):
+    def book_apoint(self, chat_id):
         try:
 
             whatsapp_link ="<a href='http://wa.me/972"+self.phone[1:]+"' id='ow459' __is_owner='true'>פתח שיחה בווצאפ</a>"
-            summary =self.serv_name + " - " + self.cli_name
+            summary = self.serv_name + " - " + self.cli_name
             description = "שיחה:\n" + self.phone + "\n\n"+whatsapp_link
 
             self.appo_id = self.book(summary,description)
@@ -113,12 +113,12 @@ class Appoint(Client,Service):
                     GC.addMail(self.appo_id,self.email)
 
                 if chat_id in SetJs.get("Admins"):
-                    text = '✅ נקבע תור ע"י ' + SetJs.get("Admins_name")[self.chat_id] +" ל"+ self.cli_name + ":\n" + self.serv_name + ', ב-' + goodloking_date(self.date) + ' , ' + self.time[:5]
-                    bot.send_message(SetJs.get("Channels")["update"],text)
+                    text = '✅ נקבע תור ע"י ' + SetJs.get("Admins_name")[self.chat_id] + " ל" + self.cli_name + ":\n" + self.serv_name + ', ב-' + goodloking_date(self.date) + ' , ' + self.time[:5]
+                    bot.send_message(SetJs.get("Channels")["update"], text)
                     return "\nהתור נקבע בהצלחה!\n"
                 else:
-                    text ='✅ נקבע תור ע"י '+self.cli_name +":\n"+ self.serv_name+', ב-' +goodloking_date(self.date) + ' , ' + self.time[:5]
-                    bot.send_message(SetJs.get("Channels")["update"],text)
+                    text = '✅ נקבע תור ע"י ' +self.cli_name + ":\n" + self.serv_name+', ב-' + goodloking_date(self.date) + ' , ' + self.time[:5]
+                    bot.send_message(SetJs.get("Channels")["update"], text)
                 return "\nהתור נקבע בהצלחה !\nנא להגיע בזמן 🤗\n\n"
 
         except:
@@ -126,12 +126,12 @@ class Appoint(Client,Service):
             traceback.print_exc()
             return 'Error'
 
-    def book(self,summary,description):
+    def book(self, summary, description):
 
-        start = (datetime.strptime(self.date + " " + self.time,'%Y-%m-%d %H:%M:%S'))
-        start = datetime(start.year,start.month,start.day,start.hour,start.minute)
+        start = (datetime.strptime(self.date + " " + self.time, '%Y-%m-%d %H:%M:%S'))
+        start = datetime(start.year, start.month, start.day, start.hour, start.minute)
         end = start + timedelta(minutes=int(self.dur))
-        isavil = self.last_check_avail(str(start),str(end))
+        isavil = self.last_check_avail(str(start), str(end))
         if isavil == True:
             start = start.isoformat()
             end = end.isoformat()
@@ -151,10 +151,10 @@ class Appoint(Client,Service):
 
             cli_id = DB.getOneVal("userdetails","user_id",f"phone_number = '{self.phone}'")
             if cli_id:
-                DB.insert('Appointments','user_id, service_name, appoint_id, date, time',f"'{cli_id}','{self.serv_name}','{self.appo_id}','{self.date}','{self.time}'")
+                DB.insert('Appointments', 'user_id, service_name, appoint_id, date, time', f"'{cli_id}','{self.serv_name}','{self.appo_id}','{self.date}','{self.time}'")
 
         else:
-            DB.insert('Appointments','user_id, service_name, appoint_id, date, time',f"'{chat_id}','{self.serv_name}','{self.appo_id}','{self.date}','{self.time}'")
+            DB.insert('Appointments', 'user_id, service_name, appoint_id, date, time', f"'{chat_id}','{self.serv_name}','{self.appo_id}','{self.date}','{self.time}'")
 
     def last_check_avail(self,start,end):
         start = (datetime.strptime(start,'%Y-%m-%d %H:%M:%S')) - timedelta(hours=2)
@@ -163,7 +163,7 @@ class Appoint(Client,Service):
         end = (datetime.strptime(end,'%Y-%m-%d %H:%M:%S')) - timedelta(hours=2)
         end = end.isoformat() + 'Z'
         events_result = GC.getAppoList(start,end)
-        events = events_result.get('items',[])
+        events = events_result.get('items', [])
 
         if (events == []):
             return True

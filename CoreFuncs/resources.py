@@ -11,26 +11,29 @@ from googleapiclient.discovery import build
 # from CoreFuncs.func import FinalEx
 
 
-class Log():
+class Log:
     def __init__(self):
-        logging.basicConfig(filename='bot.log',filemode='w',format='%(asctime)s - %(message)s',level=logging.INFO)
-        self.func_name = traceback.extract_stack(None,2)[0][2]
+        logging.basicConfig(filename='bot.log', filemode='w', format='%(asctime)s - %(message)s', level=logging.INFO)
+        # logging.getLogger("googleapiclient").setLevel(logging.WARNING)
+        logging.getLogger("googleapiclient.discovery").setLevel(logging.WARNING)
 
-    def Pass(self,identifier):
+        self.func_name = traceback.extract_stack(None, 2)[0][2]
+
+    def Pass(self, identifier):
         logging.error(str(identifier) + f":Pass exception occurred in " + self.func_name + f" -> {traceback.format_exc()}")
         # logging.info((chat_id + f":Pass exception occurred in " + self.func_name))
 
-    def Warn(self,identifier='Unknown',msg=' '):
+    def Warn(self, identifier='Unknown', msg=' '):
         logging.warning(str(identifier) + ": " + f"An Unexcepted error occurred in " + self.func_name + ". " + msg + "-> ",
                         exc_info=True)
 
     def Info(self, identifier, txt):
         logging.info(identifier + ": " + txt)
 
-    def In(self,chat_id: object) -> object:
+    def In(self, chat_id: object) -> object:
         logging.info(str(chat_id) + ": in " + self.func_name)
 
-    def Choice(self,chat_id,txt):
+    def Choice(self, chat_id, txt):
         logging.info(chat_id + ": Action: " + txt)
 
 
@@ -46,15 +49,14 @@ class wrapper:
         def decorate(func):
             def call(*args, **kwargs):
                 pre(self, func, *args, **kwargs)
+                result = False
                 try:
-                    # logging.info(f"function {self.activator}.{func.__name__} activated")
-                    # log.Info(self.activator, f"activate func '{func.__name__}'")
                     result = func(*args, **kwargs)
                 except:
                     logging.warning(str(self.activator) + f": func:{func.__name__}, args:{args[1:]},\n kwargs:{kwargs}->\n ",
                                     exc_info=True)
+                    raise Exception
 
-                    # log.Warn(self.activator,f"func:{func.__name__}, args:{kwargs}")
                 post(self, func, *args, **kwargs)
                 return result
 
@@ -76,7 +78,7 @@ class Myjson:
         self.file = file_path + '.json'
 
     @wrapper.wrap(w, w.trace_in, w.trace_out)
-    def get(self,key=False):
+    def get(self, key=False):
         with open(self.file, encoding='utf-8') as json_file:
             data = json.loads(json_file.read(), encoding='utf-8')
             if not key:
@@ -86,23 +88,23 @@ class Myjson:
                 return val
             return None
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
+    @wrapper.wrap(w,w.trace_in, w.trace_out)
     def addToLstInJson(self, key, value):
         key = str(key)
-        with open(self.file,encoding='utf-8') as json_file:
+        with open(self.file, encoding='utf-8') as json_file:
             data = json.loads(json_file.read(), encoding='utf-8')
             data.setdefault(key, []).append(value)
-        with open(self.file,'w') as outfile:
-            json.dump(data,outfile,ensure_ascii=False)
+        with open(self.file, 'w') as outfile:
+            json.dump(data, outfile, ensure_ascii=False)
 
-    @wrapper.wrap(w, w.trace_in,w.trace_out)
+    @wrapper.wrap(w, w.trace_in, w.trace_out)
     def delVal(self, key):
         with open(self.file) as json_file:
             data = json.load(json_file)
             data.pop(key, None)
 
         with open(self.file, 'w') as outfile:
-            json.dump(data,outfile)
+            json.dump(data, outfile)
 
 
 class DBgetset:
@@ -126,15 +128,13 @@ class DBgetset:
         except:
             return False
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
-    def insert(self, table, columns, values):  # BUG function isnt ready
-        # self.c.execute(f"INSERT INTO {table} VALUES ({values})")
+    @wrapper.wrap(w, w.trace_in, w.trace_out)
+    def insert(self, table, columns, values):
         self.c.execute(f"INSERT INTO {table} ({columns}) VALUES ({values})")
         self.connection.commit()
 
     @wrapper.wrap(w, w.trace_in, w.trace_out)
-    def update(self, table, set, where,):  # BUG function isnt ready
-        # log.Info()
+    def update(self, table, set, where,):
         self.c.execute(f"UPDATE {table} SET {set} WHERE {where}")
         self.connection.commit()
 
@@ -153,44 +153,31 @@ class GCFuncs:
     def __init__(self):
         self.service = self.get_calendar_service()
 
-    @wrapper.wrap(w,w.trace_in, w.trace_out)
+    @wrapper.wrap(w, w.trace_in, w.trace_out)
     def addAppo(self, start, end, summary, description):
 
-        try:
             event_result = self.service.events().insert(calendarId='primary',
                                                         body={
                                                             "summary": summary,
                                                             "description": description,
-                                                            "start": {"dateTime": start,"timeZone": "Asia/Jerusalem"},
-                                                            "end": {"dateTime": end,"timeZone": "Asia/Jerusalem"},
+                                                            "start": {"dateTime": start, "timeZone": "Asia/Jerusalem"},
+                                                            "end": {"dateTime": end, "timeZone": "Asia/Jerusalem"},
                                                         }
                                                         ).execute()
             return event_result
-        except:
-            # log.Warn('Unknown',
-            #            'arguments:\n summary: ' + summary + '\n description: ' + description + '\n start: ' + ap.start + '\n end: ' + ap.end + '\n')
-            pass
 
     @wrapper.wrap(w, w.trace_in, w.trace_out)
     def getAppo(self, appo_id):
-
-        try:
-            events = self.service.events().get(calendarId='primary',eventId=appo_id).execute()
+            events = self.service.events().get(calendarId='primary', eventId=appo_id).execute()
             return events
-        except:
-            # log.Pass(str(chat_id))
-            pass
 
-    @wrapper.wrap(w,w.trace_in, w.trace_out)
+    @wrapper.wrap(w, w.trace_in, w.trace_out)
     def getAppoList(self, start, end):
-        try:
             events_result = self.service.events().list(calendarId='primary',timeMin=start,timeMax=end,
-                                                       maxResults=100,singleEvents=True,
+                                                       maxResults=100, singleEvents=True,
                                                        orderBy='startTime').execute()
             return events_result
-        except:
-            # Log().Pass(str(chat_id))
-            pass
+
 
     @wrapper.wrap(w, w.trace_in, w.trace_out)
     def delAppo(self, appo_id):
@@ -199,24 +186,24 @@ class GCFuncs:
             events = self.service.events().delete(calendarId='primary',eventId=appo_id).execute()
             return events
         except:
-            # Log().Pass(str(chat_id))
+            log.Pass(str(self.chat_id))
             pass
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
-    def addMail(self,appo_id,email):
-        self.service.events().patch(calendarId='primary',eventId=appo_id,body={"attendees": [
+    @wrapper.wrap(w,w.trace_in, w.trace_out)
+    def addMail(self, appo_id, email):
+        self.service.events().patch(calendarId='primary', eventId=appo_id, body={"attendees": [
             {"email": [email]}]},).execute()
 
-    @wrapper.wrap(w,w.trace_in,w.trace_out)
-    def update_color(self,appo_id,color):
+    @wrapper.wrap(w, w.trace_in, w.trace_out)
+    def update_color(self, appo_id, color):
         try:
             self.service.events().patch(
                 calendarId='primary',
                 eventId=appo_id,
                 body={'colorId': color},).execute()
         except:
-            print('Could not update color')
-            # traceback.print_exc()
+            log.Pass(str(self.chat_id))
+            pass
 
     def get_calendar_service(self):
         creds = None
@@ -224,10 +211,10 @@ class GCFuncs:
         # created automatically when the authorization flow completes for the first
         # time.
         if os.path.exists("Files/shovalleviw.pickle"):  # outputJson('MailToken')):
-            with open("Files/shovalleviw.pickle",'rb') as token:
+            with open("Files/shovalleviw.pickle", 'rb') as token:
                 creds = pickle.load(token)
         try:
-            service = build('calendar','v3',credentials=creds)
+            service = build('calendar', 'v3', credentials=creds, cache_discovery=False)
         except:
             return 0
 

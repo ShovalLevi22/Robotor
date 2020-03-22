@@ -26,10 +26,10 @@ class MakeAppo:
 
 
     @staticmethod
-    def serviceKeyboard(chosen_servs = []):
+    def serviceKeyboard(chosen_servs=[]):
         services = DB.get('services')
         markup = types.InlineKeyboardMarkup()
-        for i,srv in services.iterrows():
+        for i, srv in services.iterrows():
             if str(srv["service_id"]) in chosen_servs:
                 text = " ✅ " + str(srv["service_name"]) + "- ₪" + str(srv["price"]) + ""
                 markup.add(btn(text, ['MakeAppo', 'unselect_service', str(srv["service_id"])]))
@@ -40,26 +40,26 @@ class MakeAppo:
 
         markup.add(btn("הבא ⬅️", ['MakeAppo', 'set_services', None]))
         markup.add(btn(Home=True))
-
         return markup
 
     def select_service(self):
-        addToList(TempUsers,self.chat_id,self.value)
-        create_menu(self.call,ServsTexst,self.serviceKeyboard(TempUsers[self.chat_id]))
+        addToList(TempUsers, self.chat_id, self.value)
+        bot.edit_message_reply_markup(self.chat_id, self.call.message.message_id, reply_markup=self.serviceKeyboard(TempUsers[self.chat_id]))
 
     def unselect_service(self):
         TempUsers[self.chat_id].remove(self.value)
-        create_menu(self.call,ServsTexst,self.serviceKeyboard(TempUsers[self.chat_id]))
+        bot.edit_message_reply_markup(self.chat_id, self.call.message.message_id,
+                                      reply_markup=self.serviceKeyboard(TempUsers[self.chat_id]))
 
     def set_services(self):
-        if TempUsers[self.chat_id]: #if user chose services
+        if TempUsers[self.chat_id] != []: #if user chose services
             self.ap.setServiceDetails(TempUsers[self.chat_id])
             TempUsers.pop(self.chat_id)
             create_menu(self.call, DatesText, self.weekKeyboard(self.chat_id))
 
         else:
             txt = "*שים/י ❤ לא בחרת שירות רצוי,*\n"
-            create_menu(self.call,txt+ServsTexst,self.serviceKeyboard(self.chat_id))
+            create_menu(self.call, txt+ServsTexst, self.serviceKeyboard(self.chat_id))
 
     def weekKeyboard(self, chat_id, add_to_week=0, in_use=False):
         this_week = int(datetime.now().strftime("%U"))
@@ -88,7 +88,7 @@ class MakeAppo:
         else:
             count = 0
             for date in lst:
-                btns.insert(0, btn(self.keyboard_date(str(date)), ['MakeAppo', 'select_date', date]))
+                btns.insert(0,btn(self.date_button(str(date)),['MakeAppo','select_date',date]))
                 count += 1
                 if count == 3:
                     markup.add(*btns)
@@ -107,8 +107,8 @@ class MakeAppo:
 
     def select_date(self):
         self.ap.date = self.value
-        create_menu(self.call,TimingText + goodloking_date(self.ap.date),
-                    self.timeKeyboard(self.chat_id,str(self.ap.date)))
+        create_menu(self.call, TimingText + goodloking_date(self.ap.date),
+                    self.timeKeyboard(self.chat_id, str(self.ap.date)))
 
     def next_week(self):
         # TempUsers[self.chat_id] += 1
@@ -206,27 +206,27 @@ class MakeAppo:
     def check_available(self,date):
         # if all day available return true, else return list with start and end time : [['2019-09-03 22:30:00', '2019-09-03 23:30:00']...]
         start = date + " " + startTime(date)
-        start = (datetime.strptime(start,'%Y-%m-%d %H:%M:%S'))
+        start = (datetime.strptime(start, '%Y-%m-%d %H:%M:%S'))
         start = start - timedelta(hours=3)  # because of the 3 hours delay in the calendar
         start = start.isoformat() + 'Z'
 
         end = date + " " + endTime(date)
-        end = (datetime.strptime(end,'%Y-%m-%d %H:%M:%S'))
+        end = (datetime.strptime(end, '%Y-%m-%d %H:%M:%S'))
         end = end.isoformat() + 'Z'
         events_result = GC.getAppoList(start,end)
-        events = events_result.get('items',[])
+        events = events_result.get('items', [])
 
         if not events:
             return True
         else:
             app_list = []
             for event in events:
-                if event['start'].get('date',event['start'].get('date')) != None:  # if there is a all day event
+                if event['start'].get('date', event['start'].get('date')) != None:  # if there is a all day event
                     start = startTime(date)
                     end = endTime(date)
                 else:
-                    start = event['start'].get('dateTime',event['start'].get('date'))
-                    end = event['end'].get('dateTime',event['end'].get('date'))
+                    start = event['start'].get('dateTime', event['start'].get('date'))
+                    end = event['end'].get('dateTime', event['end'].get('date'))
                     if start[:10] != date:
                         start = startTime(date)
                     else:
@@ -239,12 +239,12 @@ class MakeAppo:
                 app_list.append(time_lst)
             return (app_list)
 
-    def free_app(self,start_curr,end_prev,chat_id):
+    def free_app(self, start_curr,end_prev,chat_id):
         duration = int(AppList[self.chat_id].dur)
         end_prev = str(end_prev)[0:19]
         start_curr = str(start_curr)[0:19]
-        start_curr = (datetime.strptime(start_curr,'%Y-%m-%d %H:%M:%S'))
-        end_prev = (datetime.strptime(end_prev,'%Y-%m-%d %H:%M:%S'))
+        start_curr = (datetime.strptime(start_curr, '%Y-%m-%d %H:%M:%S'))
+        end_prev = (datetime.strptime(end_prev, '%Y-%m-%d %H:%M:%S'))
         temp = end_prev + timedelta(minutes=duration)
         count = 0
         while temp <= start_curr:
@@ -252,33 +252,33 @@ class MakeAppo:
             temp += timedelta(minutes=duration)
         return count
 
-    def find_time(self,time):
+    def find_time(self, time):
         time_lst = time.split('T')[1].split('+')[0]  # takes only time
         return time_lst
 
-    def keyboard_date(self,str_date):
+    def date_button(self, str_date):
         try:
             date = datetime.strptime(str_date,'%Y-%m-%d')
             day = date.weekday()
-            txtday = datetime.strftime(date,"%d.%m.%y")[:5] + "-" + WeekDays[day]
+            txtday = WeekDays[day] + "-" + datetime.strftime(date, "%d.%m.%y")[:5]
 
             return txtday
         except:
             return 'Error'
 
-    def timeKeyboard(self,chat_id,str_date=None,result=None):
+    def timeKeyboard(self, chat_id, str_date=None,result=None):
         """Require or  str_date or result"""
         if result is None:
             result = self.print_time(str_date,chat_id)
             result = self.splitDateBut(result)
-            TempUsers[chat_id] = [result,0]
+            TempUsers[chat_id] = [result, 0]
         markup = types.InlineKeyboardMarkup()
         btns = []
         count = 0
 
         buttons = result[TempUsers[chat_id][1]]
         for i,date in enumerate(buttons):
-            btns.insert(0,btn(str(date)[:5],['MakeAppo','select_time',str(date)]))
+            btns.insert(0,btn(str(date)[:5], ['MakeAppo', 'select_time', str(date)]))
             count += 1
             if count == 3:
                 markup.add(*btns)
@@ -290,32 +290,32 @@ class MakeAppo:
             btns = []
 
         if TempUsers[chat_id][1] + 1 != len(result):
-            btns.append(btn("הבא ◀️ ",['MakeAppo','naxt_times',None]))
+            btns.append(btn("שעות נוספות ◀️ ", ['MakeAppo','naxt_times',None]))
         if TempUsers[chat_id][1] != 0:
-            btns.append(btn("▶️ הקודם",['MakeAppo','last_times',None]))
+            btns.append(btn("▶️ שעות קודמות", ['MakeAppo','last_times',None]))
         markup.add(*btns)
-        markup.add(btn("בחירת יום אחר ↪️",['MakeAppo','back_to_dates',None]))
+        markup.add(btn("בחירת יום אחר ↪️", ['MakeAppo','back_to_dates',None]))
         markup.add(btn(Home=True))
         return markup
 
     def select_time(self):
         AppList[self.chat_id].time = self.value
-        text = " האם את/ה בטוח שאתה רוצה לקבוע תור ל" + self.ap.serv_name + "\nבתאריך " + goodloking_date(
+        text = " האם את/ה בטוח שאתה רוצה לקבוע תור ל" + self.ap.serv_name + "\nב " + goodloking_date(
             self.ap.date) + "\nלשעה " + self.ap.time[:5]
-        create_menu(self.call,text,self.toconfirmKeyboard())
+        create_menu(self.call, text, self.toconfirmKeyboard())
 
     def naxt_times(self):
         TempUsers[self.chat_id][1] += 1
-        create_menu(self.call,TimingText + goodloking_date(self.ap.date),
+        create_menu(self.call, TimingText + goodloking_date(self.ap.date),
                     self.timeKeyboard(self.chat_id,result=TempUsers[self.chat_id][0]))
 
     def last_times(self):
         TempUsers[self.chat_id][1] -= 1
-        create_menu(self.call,TimingText + goodloking_date(self.ap.date),
-                    self.timeKeyboard(self.chat_id,result=TempUsers[self.chat_id][0]))
+        create_menu(self.call, TimingText + goodloking_date(self.ap.date),
+                    self.timeKeyboard(self.chat_id, result=TempUsers[self.chat_id][0]))
 
     def back_to_dates(self):
-        create_menu(self.call,DatesText,self.weekKeyboard(self.chat_id))
+        create_menu(self.call, DatesText, self.weekKeyboard(self.chat_id))
 
     def splitDateBut(self,lst):
         new_lst = []
@@ -352,7 +352,7 @@ class MakeAppo:
 
     def back_to_time(self):
         date = AppList[self.chat_id].date
-        create_menu(self.call, TimingText, self.timeKeyboard(self.chat_id, str(date)))
+        create_menu(self.call, TimingText + goodloking_date(self.ap.date), self.timeKeyboard(self.chat_id, str(date)))
 
 
 class DelAppo:
@@ -404,7 +404,7 @@ class DelAppo:
             ap = GC.getAppo(self.value)
             time = datetime.strptime(ap["start"]["dateTime"][:19],'%Y-%m-%dT%H:%M:%S')
             if now > time - cancel_limit:
-                text = "התור שהנך רוצה לבטל חורג מזמן הביטול האפשרי,\n יש ליצור קשר עם בעל העסק על מנת לבטל תור זה.\n\n " + start_text(
+                text = "*❗️ שים/י ❤️ התור שהנך רוצה לבטל חורג מזמן הביטול האפשרי,\nיש ליצור קשר עם בעל העסק על מנת לבטל תור זה.*\n\n " + start_text(
                     self.chat_id)
                 create_menu(self.call,text,mainKeyboard(self.chat_id))
             else:

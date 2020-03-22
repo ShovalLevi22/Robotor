@@ -38,7 +38,7 @@ def goodloking_date(str_date):
     try:
         date = datetime.strptime(str_date, '%Y-%m-%d')
         day = date.weekday()
-        txtday =" יום-"+ WeekDays[day] + datetime.strftime(date, "%d.%m.%y")
+        txtday ="יום-"+ WeekDays[day] + " ה-" + datetime.strftime(date, "%d.%m.%y")
         return txtday
 
     except:
@@ -162,7 +162,7 @@ def txtFromFile(jsonValue):
 def start_text(chat_id):
     if chat_id in SetJs.get("Admins"):
         names = SetJs.get("Admins_name")
-        txt = f"*היי {names[chat_id]}*"
+        txt = f"*היי {names[chat_id]},*"
         return txt + admin_start_txt
     else:
         name = DB.getOneVal('userdetails', 'customer_name', f"user_id='{chat_id}'")
@@ -170,7 +170,7 @@ def start_text(chat_id):
             txt = "*היי, *" + txtFromFile('Menu') + "\n" + instagram()
         else:
             namelist = name.split()
-            txt = "*" + "היי " + namelist[0] + "*" + txtFromFile('Menu') + "\n" + instagram()
+            txt = "*" + "היי " + namelist[0] + ",*" + txtFromFile('Menu') + "\n" + instagram()
         return txt + optionsHead
 
 
@@ -221,6 +221,10 @@ def create_menu(call, text1, reply_m, string='default'):
                               reply_markup=reply_m,
                               parse_mode='Markdown',
                               disable_web_page_preview=True)
+
+    except telebot.apihelper.ApiException:
+        log.Pass(chat_id)
+        pass
 
     except:
         log.Warn(chat_id)
