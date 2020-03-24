@@ -126,9 +126,9 @@ class Admin:
 
     def chanelsKeyboard():
         markup = types.InlineKeyboardMarkup()
-        markup.add(btn("🔹 לערוץ העדכונים 📌",link="https://t.me/joinchat/AAAAAFY4QUBW5t80hiiHEg"))
-        markup.add(btn("🔹 לערוץ ההודעות ✉️",link="https://t.me/joinchat/AAAAAEwLLrdnXBfqXMAzfA"))
-        markup.add(btn("🔹תמיכה 🔧",link='http://t.me/MegaKush'))
+        markup.add(btn("🔹 לערוץ העדכונים 📌",link="joinchat/AAAAAFY4QUBW5t80hiiHEg"))
+        markup.add(btn("🔹 לערוץ ההודעות ✉️",link="joinchat/AAAAAEwLLrdnXBfqXMAzfA"))
+        markup.add(btn("🔹תמיכה 🔧",link='MegaKush'))
         markup.add(btn(Home=True))
         return markup
 

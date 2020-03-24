@@ -38,7 +38,7 @@ class MainMenu:
 
     def Button_1(self):
         if self.chat_id in SetJs.get("Admins"):
-            return create_menu(self.call,"על מנת לקבוע תור ללקוח נא שלח את איש הקשר לו תרצה לקבוע את התור",
+            return create_menu(self.call, "על מנת לקבוע תור ללקוח נא שלח את איש הקשר לו תרצה לקבוע את התור",
                         onlyToMainKeyboard())
         else:
             if int(DB.getOneVal('Appointments', 'COUNT(*)', f"user_id='{self.chat_id}' ")) >= appoin_limit:

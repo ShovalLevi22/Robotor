@@ -243,12 +243,12 @@ def mainKeyboard(chat_id):
     # Admin Panel
     if str(chat_id) in SetJs.get('Admins'):
         # markup.add(types.InlineKeyboardButton(text=" קביעת תור ללקוח 📆", callback_data="['" + Version + "','Admin','1']")), \
-        markup.add(btn(" קביעת תור ללקוח 📆",["MainMenu",'1']))
+        markup.add(btn(" קביעת תור ללקוח 📆", ["MainMenu",'1']))
         markup.add(btn(" צפייה בתורים עתידיים 📖",["MainMenu",'2']))
-        markup.add(btn(" ביטול תור עתידי ✖️",["MainMenu",'3']))
-        markup.add(btn(" פרטי השירותים שלי ✍",["MainMenu",'4']))
+        markup.add(btn(" ביטול תור עתידי ✖️", ["MainMenu", '3']))
+        markup.add(btn(" פרטי השירותים שלי ✍", ["MainMenu", '4']))
         markup.add(btn(" שליחת הודעת תפוצה 📨",["MainMenu",'5']))
-        markup.add(btn(" ערוצים ↖️",["MainMenu",'6']))
+        markup.add(btn(" ערוצים ↖️", ["MainMenu", '6']))
 
     else:
         # main buttons
@@ -258,11 +258,11 @@ def mainKeyboard(chat_id):
         mainbut3 = "ביטול תור עתידי ✖️"
         mainbut4 = "לוח  הודעות ✉️"
         mainbut5 = "מדריך לשימוש בבוט ⚙"
-        markup.add(btn(mainbut1,["MainMenu",'1']))
-        markup.add(btn(mainbut2,["MainMenu",'2']))
-        markup.add(btn(mainbut3,["MainMenu",'3']))
-        markup.add(btn(mainbut4,link="https://t.me/joinchat/AAAAAEwLLrdnXBfqXMAzfA"))
-        markup.add(btn(mainbut5,link='http://t.me/MegaKush'))
+        markup.add(btn(mainbut1, ["MainMenu", '1']))
+        markup.add(btn(mainbut2, ["MainMenu", '2']))
+        markup.add(btn(mainbut3, ["MainMenu", '3']))
+        markup.add(btn(mainbut4, link="joinchat/AAAAAEwLLrdnXBfqXMAzfA"))
+        markup.add(btn(mainbut5, link='http://t.me/MegaKush'))
 
     return markup
 

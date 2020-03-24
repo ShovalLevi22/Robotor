@@ -175,13 +175,13 @@ class Appoint(Client,Service):
             GC.delAppo(self.appo_id)
             date = goodloking_date(self.date)
 
-            try: #BUG: what if not in admin ?
-                DB.delete("Admin_appoints",f"appoint_id='{self.appo_id}'")
+            try:
+                DB.delete("Admin_appoints", f"appoint_id='{self.appo_id}'")
             except:
                 pass
 
             try:
-                DB.delete("Appointments",f"appoint_id='{self.appo_id}'")
+                DB.delete("Appointments", f"appoint_id='{self.appo_id}'")
 
             except:
                 pass
